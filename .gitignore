@@ -1,0 +1,18 @@
+# Project exclude paths
+/http/target/
+/http/target/scala-2.13/classes/
+/modules/client/domain/target/
+/modules/client/domain/target/scala-2.13/classes/
+/modules/client/infrastructure/target/
+/modules/common/error/target/
+/modules/common/error/target/scala-2.13/classes/
+/modules/common/logging/target/
+/modules/common/logging/target/scala-2.13/classes/
+/modules/common/validation/target/
+/modules/common/validation/target/scala-2.13/classes/
+/project/project/target/
+/project/target/
+/target/
+/target/scala-2.13/classes/
+/.bsp/
+/.idea
