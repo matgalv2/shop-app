@@ -25,7 +25,7 @@ object Config {
     ) |@| ConfigDescriptor.nested("host")(hostDescriptor))(Http.apply, Http.unapply)
   }
 
-  final case class Database(url: String, database: String, user: String, password: String)
+  final case class Database(url: String, database: String, schema: String, user: String, password: String)
 
   implicit val databaseDescriptor: ConfigDescriptor[Database] = DeriveConfigDescriptor.descriptor
 
