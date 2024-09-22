@@ -1,20 +1,24 @@
+import sbt.addCompilerPlugin
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 version := "0.1"
 name := "shop-app"
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.14"
 
 // Convenience for cross-compat testing
-ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.12")
-ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
+//ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.12")
+//ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
 
-val commonSettings = Seq(
+val common = Seq(
   scalacOptions ++= (if (scalaVersion.value.startsWith("2.12")) Seq("-Ypartial-unification") else Nil),
   // Use zio-test runner
   testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
-  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
+//  resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
   // Ensure canceling `run` releases socket, no matter what
-  run / fork := true
+  run / fork := true,
+  scalacOptions += "-Ymacro-annotations"
+//  scalacOptions ++= (if (scalaVersion.value.startsWith("2.12")) Seq("-Ymacro-annotations") else Seq.empty),
 )
 
 
@@ -33,11 +37,11 @@ lazy val apiSpecFiles = List("userApi", "productApi", "orderApi")
 
 
 lazy val http = (project in file("http"))
-  .settings(commonSettings)
-  .settings(
-    Compile / guardrailTasks ++= generateServers(apiSpecFiles *)
-  )
-  .enablePlugins(GuardrailPlugin)
+  .settings(common *)
+//  .settings(
+//    Compile / guardrailTasks ++= generateServers(apiSpecFiles *)
+//  )
+//  .enablePlugins(GuardrailPlugin)
   .settings(
     libraryDependencies ++= Seq(
       // Depends on http4s-managed cats and circe
@@ -63,30 +67,18 @@ lazy val http = (project in file("http"))
       Dependencies.cats.core,
       Dependencies.cats.effect,
       Dependencies.cats.slf4jCats,
-//      // PostgreSQL
-//      Dependencies.postgresql.postgresql,
+      // PostgreSQL
+      Dependencies.postgresql.postgresql,
+      // Flyway
+      Dependencies.flyway.core,
+      Dependencies.flyway.postgres,
       // Quill
-      Dependencies.quill.quillJdbc,
-      Dependencies.h2database.h2,
-      Dependencies.flyway.core
-
+      Dependencies.quill.quillJdbc
     )
   )
   .settings(dependencyOverrides += Dependencies.comcast.core)
   .dependsOn(clientDomain, clientInfrastructure, logging, error)
 
-lazy val clientDomain = (project in file("/modules/client/domain"))
-  .settings(name := "client-domain")
-  .settings(libraryDependencies += Dependencies.zio.zio)
-  .settings(libraryDependencies += Dependencies.zio.macros)
-  .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation)
-
-lazy val clientInfrastructure = (project in file("/modules/client/infrastructure"))
-  .settings(name := "client-infrastructure")
-  .settings(libraryDependencies += Dependencies.zio.zio)
-  .settings(libraryDependencies += Dependencies.zio.sql)
-  .dependsOn(clientDomain)
 
 lazy val error = (project in file("/modules/common/error"))
   .settings(name := "error")
@@ -97,7 +89,35 @@ lazy val logging = (project in file("/modules/common/logging"))
 
 lazy val validation = (project in file("/modules/common/validation"))
   .settings(name := "validation")
+//  .settings(scalaVersion := "2.13.12")
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.cats.core)
 
 
+lazy val clientDomain = (project in file("/modules/client/domain"))
+  .settings(name := "client-domain")
+//  .settings(scalaVersion := "2.13.12")
+//  .settings(scalacOptions += "-Ymacro-annotations")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.cats.core)
+  .dependsOn(validation)
+
+lazy val clientInfrastructure = (project in file("/modules/client/infrastructure"))
+  .settings(name := "client-infrastructure")
+  .settings(common *)
+  .settings(
+    libraryDependencies ++= {
+      if (scalaVersion.value.startsWith("2.12")) {
+        Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full))
+      } else {
+        Seq.empty
+      }
+    }
+  )
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.quill.quillJdbc)
+//  .settings(libraryDependencies += Dependencies.zio.quill)
+  .settings(libraryDependencies += Dependencies.flyway.postgres)
+  .dependsOn(clientDomain)
