@@ -1,11 +1,11 @@
-package io.github.g4lowy.client.model
+package io.github.g4lowy.client.domain.model
 
 import io.github.g4lowy.validation.extras.NotValidated
 import io.github.g4lowy.validation.validators.Validation
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.Validator._
 
-case class FirstName private(value: String)
+final case class FirstName private(value: String)
 
 object FirstName{
   final case class Unvalidated(value: String) extends NotValidated[FirstName]{

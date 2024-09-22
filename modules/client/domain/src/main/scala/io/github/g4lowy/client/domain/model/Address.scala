@@ -1,4 +1,4 @@
-package io.github.g4lowy.client.model
+package io.github.g4lowy.client.domain.model
 
 import io.github.g4lowy.validation.validators.Validation
 import Address._
@@ -7,7 +7,7 @@ import io.github.g4lowy.validation.validators.Validator.FailureDescription
 
 import io.github.g4lowy.validation.validators.Validator._
 
-case class Address private(country: Country, city: City, street: Street, zipCode:ZipCode, building: Building, apartment: Option[Apartment])
+final case class Address private(country: Country, city: City, street: Street, zipCode:ZipCode, building: Building, apartment: Option[Apartment])
 
 object Address{
 
