@@ -9,7 +9,6 @@ object Dependencies {
     lazy val macros      = "dev.zio"              %% "zio-macros"       % V.zio
     lazy val magic       = "io.github.kitlangton" %% "zio-magic"        % V.zioMagic
     lazy val logging     = "dev.zio"              %% "zio-logging"      % V.zioLogging
-    lazy val sql         = "dev.zio"              %% "zio-sql-postgres" % V.zioSql
 
     object config {
       lazy val core           = "dev.zio" %% "zio-config"          % V.zioConfig
@@ -41,16 +40,13 @@ object Dependencies {
     lazy val core = "com.comcast" %% "ip4s-core" % V.comcast
   }
 
-//  object postgresql {
-//    lazy val postgresql = "org.postgresql" % "postgresql" % V.postgresql
-//  }
-
-  object h2database {
-    lazy val h2 = "com.h2database" % "h2" % V.h2
+  object postgresql {
+    lazy val postgresql = "org.postgresql" % "postgresql" % V.postgresql
   }
 
   object flyway {
     lazy val core = "org.flywaydb" % "flyway-core" % V.flyway
+    lazy val postgres = "org.flywaydb" % "flyway-database-postgresql" % V.flyway % "runtime"
 
   }
 
@@ -65,7 +61,6 @@ object Dependencies {
   object V {
     val zio         = "1.0.18" //"2.0.9"
     val zioConfig   = "1.0.10"
-    val zioSql      = "0.1.2"
     val http4s      = "0.21.24"
     val cats        = "2.8.0"
     val catsEffect  = "2.1.0"
@@ -78,7 +73,6 @@ object Dependencies {
     val typesafe    = "1.4.2"
     val postgresql  = "42.7.4"
     val quill       = "4.7.0"
-    val h2          = "2.2.224"
     val flyway      = "10.18.0"
 
   }
