@@ -1,4 +1,4 @@
-package io.github.g4lowy.client.model
+package io.github.g4lowy.client.domain.model
 
 sealed trait ClientError
 
