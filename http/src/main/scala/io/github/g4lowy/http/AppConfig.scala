@@ -1,10 +1,9 @@
 package io.github.g4lowy.http
 
-import com.comcast.ip4s.{Host, Port}
-import zio.ZLayer
+import com.comcast.ip4s.{ Host, Port }
 import zio.config._
 import zio.config.magnolia.descriptor
-import zio.config.typesafe.{TypesafeConfig, TypesafeConfigSource}
+import zio.config.typesafe.TypesafeConfig
 
 final case class AppConfig(http: AppConfig.Http, database: AppConfig.Database)
 
