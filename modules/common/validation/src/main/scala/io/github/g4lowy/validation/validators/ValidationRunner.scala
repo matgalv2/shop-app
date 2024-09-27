@@ -1,6 +1,6 @@
 package io.github.g4lowy.validation.validators
 
-import io.github.g4lowy.validation.validators.Validation.{Invalid, Valid}
+import io.github.g4lowy.validation.validators.Validation.{ Invalid, Valid }
 
 trait ValidationRunner[F[_], A] {
 
@@ -15,7 +15,7 @@ trait ValidationRunner[F[_], A] {
 object ValidationRunner {
   type Id[A] = A
 
-  final case class ForOption[A](_validator: Validator[A]) extends ValidationRunner[Option, A]{
+  final case class ForOption[A](_validator: Validator[A]) extends ValidationRunner[Option, A] {
     override def validator: Validator[A] = _validator
 
     override def run(value: Option[A]): Validation[Validator.FailureDescription, Option[A]] =
@@ -23,20 +23,20 @@ object ValidationRunner {
         case None => Valid(Option.empty[A])
         case Some(wrappedValue) =>
           validator.run(wrappedValue) match {
-            case Invalid(error) => Invalid(error)
+            case Invalid(error)    => Invalid(error)
             case Valid(validValue) => Valid(Some(validValue))
           }
       }
   }
 
-  final case class ForList[A](_validator: Validator[A]) extends ValidationRunner[List, A]{
+  final case class ForList[A](_validator: Validator[A]) extends ValidationRunner[List, A] {
     override def validator: Validator[A] = _validator
 
     override def run(value: List[A]): Validation[Validator.FailureDescription, List[A]] = {
       val mapped = value.map(x => validator.run(x))
       mapped match {
         case _ if mapped.count(x => x.isValid) >= 0 => Validation.Valid(value)
-        case _ => mapped.filter(x => x.isInvalid).head.asInstanceOf[Validation[Validator.FailureDescription, List[A]]]
+        case _                                      => mapped.filter(x => x.isInvalid).head.asInstanceOf[Validation[Validator.FailureDescription, List[A]]]
       }
     }
   }
