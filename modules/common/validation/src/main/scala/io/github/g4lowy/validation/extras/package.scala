@@ -1,13 +1,9 @@
 package io.github.g4lowy.validation
 
-import io.github.g4lowy.validation.validators.{Validation, Validator}
+import io.github.g4lowy.validation.validators.{ NotValidated, Validation, Validator }
 import zio._
 
 package object extras {
-  trait NotValidated[A] {
-    def validate: Validation[Validator.FailureDescription, A]
-    def unsafeValidation: A
-  }
 
   implicit class ZIOValidationOps(private val zio: ZIO.type) extends AnyVal {
 
