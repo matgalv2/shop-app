@@ -1,12 +1,11 @@
 package io.github.g4lowy.client.domain.model
 
-import io.github.g4lowy.validation.extras.NotValidated
-import io.github.g4lowy.validation.validators.Validation
+import io.github.g4lowy.validation.validators.{ NotValidated, Validation }
 import io.github.g4lowy.validation.validators.Validator._
 
 import java.util.UUID
 
-final case class ClientId private(value: UUID)
+final case class ClientId private (value: UUID)
 
 object ClientId {
   def generate: ClientId.Unvalidated = ClientId.Unvalidated(UUID.randomUUID.toString)
