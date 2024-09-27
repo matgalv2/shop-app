@@ -1,6 +1,4 @@
 import sbt.addCompilerPlugin
-import sbt.internal.IvyConsole
-import sbt.internal.PluginsDebug.DeactivatePlugin
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -49,7 +47,6 @@ lazy val http = (project in file("http"))
       Dependencies.zio.config.core,
       Dependencies.zio.config.typesafeConfig,
       Dependencies.zio.config.magnolia,
-//      Dependencies.zio.magic,
       // Comcast
       Dependencies.comcast.core,
       // Cats
