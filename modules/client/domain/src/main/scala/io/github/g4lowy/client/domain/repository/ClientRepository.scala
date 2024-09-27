@@ -1,7 +1,7 @@
 package io.github.g4lowy.client.domain.repository
 
-import io.github.g4lowy.client.domain.model.{Client, ClientError, ClientId}
-import zio.{IO, UIO}
+import io.github.g4lowy.client.domain.model.{ Client, ClientError, ClientId }
+import zio.{ IO, UIO }
 import zio.macros.accessible
 
 @accessible
@@ -10,5 +10,5 @@ trait ClientRepository {
   def getAll: UIO[List[Client]]
   def create(client: Client): UIO[ClientId]
   def update(clientId: ClientId, client: Client): IO[ClientError.NotFound, Unit]
-  def delete(clientId: ClientId): UIO[Unit]
+  def delete(clientId: ClientId): IO[ClientError.NotFound, Unit]
 }
