@@ -47,6 +47,10 @@ object Dependencies {
     lazy val zio  = "io.getquill" %% "quill-jdbc-zio" % V.quill
   }
 
+  object scalaland {
+    lazy val chimney = "io.scalaland" %% "chimney" % V.chimney
+  }
+
   object V {
     val zio         = "2.0.15"
     val zioConfig   = "3.0.7"
@@ -63,6 +67,7 @@ object Dependencies {
     val postgresql  = "42.7.4"
     val quill       = "4.7.0"
     val flyway      = "10.18.0"
+    val chimney     = "1.4.0"
 
   }
 }

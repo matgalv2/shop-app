@@ -1,4 +1,6 @@
 import sbt.addCompilerPlugin
+import sbt.internal.IvyConsole
+import sbt.internal.PluginsDebug.DeactivatePlugin
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -59,7 +61,9 @@ lazy val http = (project in file("http"))
       Dependencies.flyway.core,
       Dependencies.flyway.postgres,
       // Quill
-      Dependencies.quill.jdbc
+      Dependencies.quill.jdbc,
+      // Chimney
+      Dependencies.scalaland.chimney
     )
   )
   .dependsOn(clientDomain, clientInfrastructure, error)
