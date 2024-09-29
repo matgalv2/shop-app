@@ -1,8 +1,13 @@
 # Shop app
-Simple CRUD rest-based application for managing online store.
+Simple CRUD rest-based application for managing online store. Database consists of 5 tables: clients, products, orders, addresses and ordersproducts, which resolves N:N relation between those two.
 
 ![image info](./icon.png)
 
+
+### Progress
+![](https://geps.dev/progress/40?dangerColor=800000&warningColor=ff9900&successColor=006600)
+
+## Technology & tools:
 Technology stack:
 * Scala 2.13
 * ZIO 2
