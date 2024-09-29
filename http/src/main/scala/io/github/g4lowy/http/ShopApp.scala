@@ -11,13 +11,15 @@ object ShopApp extends ZIOAppDefault {
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     for {
-      migrations <- DatabaseConfiguration.flyway
-      config     <- ZIO.service[AppConfig]
-      _          <- ZIO.log(config.http.host.toString)
-    } yield migrations
+      _      <- DatabaseConfiguration.flyway
+      config <- ZIO.service[AppConfig]
+      _      <- ZIO.log(config.http.host.toString)
+      server <- Controller.server
+    } yield server
   }
     .provideLayer(dependencies)
 
-  private val dependencies = configLive >+> quillPostgres >+> postgresLive >+> ClientRepositoryPostgres.live
+  private val dependencies =
+    configLive >+> quillPostgres >+> postgresLive >+> ClientRepositoryPostgres.live ++ HttpServer.live
 
 }
