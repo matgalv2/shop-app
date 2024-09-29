@@ -1,7 +1,42 @@
+# Shop app
+Simple CRUD rest-based application for managing online store.
+
+![image info](./icon.png)
+
+Technology stack:
+* Scala 2.13
+* ZIO 2
+* PostgreSQL
+* Flyway
+* HTTP4S
+* Cats 2
+* OpenAPI
+
+Tools & libraries:
+* Guardrail
+* Quill
+* Chimney
+* Typesafe config
 
 
+## API
+All APIs are described here:
+* [Clients API](./api/clientApi.yaml)
+* [Products API]()
+* [Orders API]()
 
+## Design decisions:
+### 1. REST API
+* Based on OpenApi specifications Guardrail generates boilerplate code for controllers.
 
-## Design decisions
-
+### 2. Database
+* Database migrations - to ensure application works with latest version of database Flyway controls database migrations.
+* DSL - to simplify work with database Quill provides QDSL for expressing queries in Scala.
 * Queries implementations - due to fact that quill queries return effects that can fail with SQLError all effects should die with DatabaseCriticalFailure
+
+### 3. Data transformation
+* Mappers - Chimney library was utilized for transforming data types (Domain <-> DAO)
+
+### 4. Domain
+* Validation - to ensure all data flowing through app is valid, all the objects are validated before being used. 
+* ErrorMessage - special type class for all domain errors to easily transform them into error responses
