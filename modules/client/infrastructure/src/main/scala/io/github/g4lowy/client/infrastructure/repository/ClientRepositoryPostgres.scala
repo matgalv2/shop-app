@@ -6,7 +6,7 @@ import io.github.g4lowy.client.domain.model.{ Client, ClientError, ClientId }
 import io.github.g4lowy.client.domain.repository.ClientRepository
 import io.github.g4lowy.client.infrastructure.model.ClientSQL
 import io.github.g4lowy.error.DatabaseCriticalFailure
-import zio.{ IO, UIO, ZIO, ZLayer }
+import zio.{ IO, UIO, URLayer, ZIO, ZLayer }
 
 case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends ClientRepository {
 
@@ -85,10 +85,9 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
       .flatMap(rowsNo => ZIO.fail(ClientError.NotFound(clientId)).unless(rowsNo == 1))
       .unit
   }
-
 }
 
 object ClientRepositoryPostgres {
-  val live: ZLayer[Quill.Postgres[CamelCase], Nothing, ClientRepositoryPostgres] =
+  val live: URLayer[Quill.Postgres[CamelCase], ClientRepositoryPostgres] =
     ZLayer.fromFunction(ClientRepositoryPostgres.apply _)
 }
