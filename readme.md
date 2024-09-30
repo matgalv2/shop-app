@@ -1,5 +1,5 @@
 # Shop app
-Simple CRUD rest-based application for managing online store. Database consists of 5 tables: clients, products, orders, addresses and ordersproducts, which resolves N:N relation between those two.
+Simple CRUD REST-based application for managing online store. Database consists of 5 tables: clients, products, orders, addresses and ordersproducts, which resolves N:N relation between those two.
 
 ![image info](./icon.png)
 
