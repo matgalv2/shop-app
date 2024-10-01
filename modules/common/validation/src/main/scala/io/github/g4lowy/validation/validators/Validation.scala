@@ -33,4 +33,16 @@ sealed trait Validation[+E, +A] { self =>
 object Validation {
   final case class Valid[A](value: A) extends Validation[Nothing, A]
   final case class Invalid[E](error: E) extends Validation[E, Nothing]
+
+  def collect[A, E](iterable: Iterable[Validation[E, A]])(op: (E, E) => E): Validation[E, Iterable[A]] = {
+    val empty: Validation[E, List[A]] = Valid(List.empty[A])
+    iterable.foldLeft(empty) { case (acc, element) =>
+      (acc, element) match {
+        case (Valid(x), Valid(y))     => Valid(y :: x)
+        case (Invalid(x), Valid(_))   => Invalid(x)
+        case (Valid(_), Invalid(y))   => Invalid(y)
+        case (Invalid(x), Invalid(y)) => Invalid(op(x, y))
+      }
+    }
+  }
 }

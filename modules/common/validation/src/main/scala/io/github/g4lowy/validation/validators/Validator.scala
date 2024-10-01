@@ -1,8 +1,8 @@
 package io.github.g4lowy.validation.validators
 
-import cats.syntax.{ ApplySyntax, FunctorSyntax }
 import io.github.g4lowy.validation.validators.Validation.{ Invalid, Valid }
 
+import java.sql.Date
 import java.util.UUID
 import scala.util.Try
 import scala.util.matching.Regex
@@ -74,6 +74,8 @@ object Validator {
 
   val negative: Validator[Int] = new Validator(_ < 0, "value needs to be negative")
 
+  val date: Validator[String] = new Validator(string => Try(Date.valueOf(string)).isSuccess, "incorrect date format")
+
   def min(value: Int): Validator[Int] = new Validator(_ >= value, s"value needs to be greater than or equal to $value")
 
   def max(value: Int): Validator[Int] = new Validator(_ <= value, s"value needs to be lesser than or equal to $value")
@@ -91,5 +93,8 @@ object Validator {
       case Some(value) => value.validate.map(Some.apply)
       case None        => Valid(None)
     }
+
+  def validateIterable[A, B <: NotValidated[A]](list: Iterable[B]): Validation[FailureDescription, Iterable[A]] =
+    Validation.collect(list.map(_.validate))(_ + _)
 
 }
