@@ -56,7 +56,7 @@ object Dependencies {
     val zioConfig   = "3.0.7"
     val http4s      = "0.21.24"
     val cats        = "2.8.0"
-    val catsEffect  = "2.1.0"
+    val catsEffect  = "2.5.1"
     val circe       = "0.13.0"
     val interopCats = "22.0.0.0"
     val zioMagic    = "0.3.12"
