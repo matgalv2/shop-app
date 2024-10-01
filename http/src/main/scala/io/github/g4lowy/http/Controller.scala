@@ -2,13 +2,10 @@ package io.github.g4lowy.http
 
 import http.generated.clients.ClientsResource
 import io.github.g4lowy.http.api.ClientApi
-import zio.{ &, RIO, Runtime, ZIO }
+import zio.{ RIO, Runtime, ZIO }
 
 object Controller {
 
-  /** An effect which, when executed, gives a MlResource (capable of transforming a MlHandler into something
-    * bindable)
-    */
   val makeClientsResource: RIO[ClientApi.Environment, ClientsResource[RIO[ClientApi.Environment, *]]] = {
     import zio.interop.catz._
     ZIO.runtime[ClientApi.Environment].map { implicit r: Runtime[ClientApi.Environment] =>
@@ -16,8 +13,6 @@ object Controller {
     }
   }
 
-  /** HTTP server implementation, utilizing the SalaryPredictor Layer
-    */
   private val clientsHandler = new ClientApi()
 
   val combinedRoutes = {
