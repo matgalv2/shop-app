@@ -11,7 +11,6 @@ import http.generated.clients.{
 import http.generated.definitions.{ CreateClient, ErrorResponse, UpdateClient }
 import io.github.g4lowy.client.domain.model.ClientId
 import io.github.g4lowy.client.domain.repository.ClientRepository
-import io.github.g4lowy.client.infrastructure.repository.ClientRepositoryPostgres
 import io.github.g4lowy.http.api.ClientApi.Environment
 import io.github.g4lowy.http.service.ClientService
 import zio.{ RIO, ZIO }
@@ -35,7 +34,7 @@ class ClientApi extends ClientsHandler[RIO[ClientApi.Environment, *]] {
   )(clientId: UUID): RIO[Environment, GetClientByIdResponse] =
     ZIO
       .fromNotValidated(ClientId.fromUUID(clientId))
-      .mapError(error => respond.BadRequest(ErrorResponse.single(error)))
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
       .flatMap { clientId =>
         ClientService
           .getClientById(clientId)
@@ -45,17 +44,49 @@ class ClientApi extends ClientsHandler[RIO[ClientApi.Environment, *]] {
       .map(respond.Ok)
       .merge
 
-  override def createClient(respond: CreateClientResponse.type)(
-    body: CreateClient
-  ): RIO[Environment, CreateClientResponse] = ???
-
-  override def deleteClient(respond: DeleteClientResponse.type)(
-    clientId: UUID
-  ): RIO[Environment, DeleteClientResponse] = ???
+  override def createClient(
+    respond: CreateClientResponse.type
+  )(body: CreateClient): RIO[Environment, CreateClientResponse] =
+    ZIO
+      .fromNotValidated(body.toDomain)
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+      .flatMap(ClientService.createClient)
+      .map(clientId => respond.Created(clientId.value))
+      .merge
 
   override def updateClient(
     respond: UpdateClientResponse.type
-  )(clientId: UUID, body: UpdateClient): RIO[Environment, UpdateClientResponse] = ???
+  )(clientId: UUID, body: UpdateClient): RIO[Environment, UpdateClientResponse] =
+    ZIO
+      .fromNotValidated(body.toDomain)
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+      .flatMap(client =>
+        ZIO
+          .fromNotValidated(ClientId.fromUUID(clientId))
+          .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+          .flatMap(id =>
+            ClientService
+              .updateClient(id, client)
+              .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
+          )
+      )
+      .as(respond.NoContent)
+      .merge
+
+  override def deleteClient(
+    respond: DeleteClientResponse.type
+  )(clientId: UUID): RIO[Environment, DeleteClientResponse] =
+    ZIO
+      .fromNotValidated(ClientId.fromUUID(clientId))
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+      .flatMap { id =>
+        ClientService
+          .deleteClient(id)
+          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
+      }
+      .as(respond.NoContent)
+      .merge
+
 }
 object ClientApi {
   type Environment = ClientRepository
