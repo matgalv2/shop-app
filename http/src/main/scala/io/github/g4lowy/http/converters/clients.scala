@@ -4,7 +4,8 @@ import http.generated.definitions.{ CreateClient, GetClient, UpdateClient }
 import io.github.g4lowy.client.domain.model.{ Client, ClientId, FirstName, LastName, Phone }
 import io.scalaland.chimney.dsl._
 
-import java.time.LocalDateTime
+import java.sql.Date
+import java.time.{ LocalDate, LocalDateTime }
 
 object clients {
 
@@ -15,6 +16,7 @@ object clients {
         .withFieldConst(_.clientId, ClientId.generate)
         .withFieldComputed(_.firstName, x => FirstName.Unvalidated(x.firstName))
         .withFieldComputed(_.lastName, x => LastName.Unvalidated(x.lastName))
+        .withFieldComputed(_.birthDate, _.birthDate.map(value => Date.valueOf(value)))
         .withFieldComputed(_.phone, x => Phone.Unvalidated(x.phone))
         .withFieldConst(_.createdAt, LocalDateTime.now())
         .transform
@@ -27,6 +29,7 @@ object clients {
         .withFieldConst(_.clientId, ClientId.generate)
         .withFieldComputed(_.firstName, x => FirstName.Unvalidated(x.firstName))
         .withFieldComputed(_.lastName, x => LastName.Unvalidated(x.lastName))
+        .withFieldComputed(_.birthDate, _.birthDate.map(value => Date.valueOf(value)))
         .withFieldComputed(_.phone, x => Phone.Unvalidated(x.phone))
         .withFieldConst(_.createdAt, LocalDateTime.now())
         .transform
@@ -39,6 +42,7 @@ object clients {
         .withFieldComputed(_.clientId, _.clientId.value)
         .withFieldComputed(_.firstName, _.firstName.value)
         .withFieldComputed(_.lastName, _.lastName.value)
+        .withFieldComputed(_.birthDate, _.birthDate.map(_.toLocalDate))
         .withFieldComputed(_.phone, _.phone.value)
         .transform
 
