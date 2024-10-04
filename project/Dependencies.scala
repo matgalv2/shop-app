@@ -51,6 +51,10 @@ object Dependencies {
     lazy val chimney = "io.scalaland" %% "chimney" % V.chimney
   }
 
+  object scalatest {
+    lazy val scalatest = "org.scalatest" %% "scalatest" % V.scalatest % Test
+  }
+
   object V {
     val zio         = "2.0.15"
     val zioConfig   = "3.0.7"
@@ -66,8 +70,8 @@ object Dependencies {
     val typesafe    = "1.4.2"
     val postgresql  = "42.7.4"
     val quill       = "4.7.0"
-    val flyway      = "10.18.0"
+    val flyway      = "10.18.2"
     val chimney     = "1.4.0"
-
+    val scalatest   = "3.2.19"
   }
 }
