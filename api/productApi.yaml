@@ -1,0 +1,196 @@
+openapi: "3.0.3"
+info:
+  title: Shop App (User API)
+  version: 0.0.1
+  contact:
+    name: Mateusz
+    url: https://github.com/matgalv2
+servers:
+  - url: http://localhost:8080
+    description: local dev
+paths:
+  /products:
+    get:
+      operationId: getAllProducts
+      x-jvm-package: products
+      responses:
+        200:
+          description: Fetches a list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetProduct"
+    post:
+      operationId: createProduct
+      x-jvm-package: products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProduct"
+      responses:
+        201:
+          description: Fetches a product by product id
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /products/{productId}:
+    get:
+      operationId: getProductById
+      x-jvm-package: products
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Fetches a product by product id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProduct'
+        400:
+          description: Product id is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      operationId: updateProduct
+      x-jvm-package: products
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProduct"
+      responses:
+        204:
+          description: Updates a product
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      operationId: deleteProduct
+      x-jvm-package: products
+      parameters:
+        - in: path
+          name: productId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        204:
+          description: Deletes a product
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  schemas:
+    GetProduct:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+        description:
+          type: string
+      required:
+        - productId
+        - name
+        - price
+        - description
+
+    CreateProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+        description:
+          type: string
+      required:
+        - name
+        - price
+        - description
+
+    UpdateProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+        description:
+          type: string
+      required:
+        - name
+        - price
+        - description
+
+    ErrorResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+        - messages
