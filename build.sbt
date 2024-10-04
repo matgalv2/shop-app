@@ -24,7 +24,7 @@ lazy val root = (project in file("."))
 def generateServers(files: String*) =
   files.map(filename => ScalaServer(file(s"api/$filename.yaml"), pkg = "http.generated", framework = "http4s")).toList
 
-lazy val apiSpecFiles = List("clientApi")
+lazy val apiSpecFiles = List("clientApi", "productApi")
 
 lazy val http = (project in file("http"))
   .settings(common *)
@@ -105,6 +105,10 @@ lazy val clientInfrastructure = (project in file("/modules/client/infrastructure
 lazy val productDomain = (project in file("/modules/product/domain"))
   .settings(name := "product-domain")
   .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.cats.core)
+  .dependsOn(validation)
 
 lazy val productInfrastructure = (project in file("/modules/product/infrastructure"))
   .settings(name := "product-infrastructure")
