@@ -70,15 +70,21 @@ object Validator {
   val uuid: Validator[String] =
     new Validator(string => Try(UUID.fromString(string)).isSuccess, s"incorrect uuid format")
 
-  val positive: Validator[Int] = new Validator(_ > 0, "value needs to be positive")
+  val positive: Validator[Double] = new Validator(_ > 0, "value needs to be positive")
 
-  val negative: Validator[Int] = new Validator(_ < 0, "value needs to be negative")
+  val negative: Validator[Double] = new Validator(_ < 0, "value needs to be negative")
 
   val date: Validator[String] = new Validator(string => Try(Date.valueOf(string)).isSuccess, "incorrect date format")
 
   def min(value: Int): Validator[Int] = new Validator(_ >= value, s"value needs to be greater than or equal to $value")
 
   def max(value: Int): Validator[Int] = new Validator(_ <= value, s"value needs to be lesser than or equal to $value")
+
+  def min(value: Double): Validator[Double] =
+    new Validator(_ >= value, s"value needs to be greater than or equal to $value")
+
+  def max(value: Double): Validator[Double] =
+    new Validator(_ <= value, s"value needs to be lesser than or equal to $value")
 
   def inRange(range: Range): Validator[Int] =
     new Validator(value => range.contains(value), s"value needs to be in range $range")
