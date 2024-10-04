@@ -13,7 +13,8 @@ val common = Seq(
   // Ensure canceling `run` releases socket, no matter what
   run / fork := true,
   scalacOptions += "-Ymacro-annotations",
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full)
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.3" cross CrossVersion.full),
+  libraryDependencies ++= List(Dependencies.zio.test, Dependencies.zio.testSbt).map(_ % "test")
 )
 
 lazy val root = (project in file("."))
@@ -40,8 +41,6 @@ lazy val http = (project in file("http"))
       // ZIO and the interop library
       Dependencies.zio.zio,
       Dependencies.zio.interopCats,
-      Dependencies.zio.test,
-      Dependencies.zio.testSbt,
       Dependencies.zio.logging,
       // ZIO config
       Dependencies.zio.config.core,
@@ -60,7 +59,9 @@ lazy val http = (project in file("http"))
       // Quill
       Dependencies.quill.jdbc,
       // Chimney
-      Dependencies.scalaland.chimney
+      Dependencies.scalaland.chimney,
+      // Scalatest
+      Dependencies.scalatest.scalatest
     )
   )
   .dependsOn(clientDomain, clientInfrastructure, error)
@@ -72,6 +73,18 @@ lazy val validation = (project in file("/modules/common/validation"))
   .settings(name := "validation")
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.cats.core)
+
+lazy val testUtils = (project in file("/modules/common/testUtils"))
+  .settings(name := "test-utils")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.quill.zio)
+  .settings(libraryDependencies += Dependencies.flyway.core)
+  .settings(libraryDependencies += Dependencies.flyway.postgres)
+  .settings(libraryDependencies += Dependencies.zio.config.core)
+  .settings(libraryDependencies += Dependencies.zio.config.typesafeConfig)
+  .settings(libraryDependencies += Dependencies.zio.config.magnolia)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
 
 lazy val clientDomain = (project in file("/modules/client/domain"))
   .settings(name := "client-domain")
@@ -86,4 +99,29 @@ lazy val clientInfrastructure = (project in file("/modules/client/infrastructure
   .settings(common *)
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.quill.zio)
-  .dependsOn(clientDomain, error)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+  .dependsOn(clientDomain, error, testUtils)
+
+lazy val productDomain = (project in file("/modules/product/domain"))
+  .settings(name := "product-domain")
+  .settings(common *)
+
+lazy val productInfrastructure = (project in file("/modules/product/infrastructure"))
+  .settings(name := "product-infrastructure")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.quill.zio)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+  .dependsOn(productDomain, error, testUtils)
+
+lazy val orderDomain = (project in file("/modules/order/domain"))
+  .settings(name := "order-domain")
+  .settings(common *)
+
+lazy val orderInfrastructure = (project in file("/modules/order/infrastructure"))
+  .settings(name := "order-infrastructure")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.quill.zio)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+  .dependsOn(orderDomain, error, testUtils)
