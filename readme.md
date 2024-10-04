@@ -7,6 +7,13 @@ Simple CRUD REST-based application for managing online store. Database consists 
 ### Progress
 ![](https://geps.dev/progress/40?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
+|                   | Clients | Products | Orders |
+|-------------------|---------|----------|--------|
+| Implementation    | ✅       | ❌        | ❌      |
+| Unit Tests        | ✅       | ❌        | ❌      |
+| Integration Tests | ✅       | ❌        | ❌      |
+| Acceptance Tests  | ❌       | ❌        | ❌      |
+
 ## Technology & tools:
 Technology stack:
 * Scala 2.13
