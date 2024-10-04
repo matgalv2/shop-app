@@ -40,5 +40,4 @@ object DatabaseConfiguration {
 
   val postgresLive = Quill.Postgres.fromNamingStrategy(CamelCase)
 
-
 }
