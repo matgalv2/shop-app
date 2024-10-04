@@ -26,7 +26,7 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
 
     result
       .as(client.clientId)
-      .orDieWith(error => DatabaseCriticalFailure(error.getMessage))
+      .orDieWith(error => error)
   }
 
   override def getById(clientId: ClientId): IO[ClientError.NotFound, Client] = {
@@ -37,9 +37,9 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
         }
       }
     result
-      .orDieWith(error => DatabaseCriticalFailure(error.getMessage))
+      .orDieWith(error => error)
       .flatMap(_.headOption match {
-        case Some(value) => ZIO.succeed(value.toDomain())
+        case Some(value) => ZIO.succeed(value.toDomain)
         case None        => ZIO.fail(ClientError.NotFound(clientId))
       })
   }
@@ -48,8 +48,8 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
     val result = run(quote(clients))
 
     result
-      .map(_.map(_.toDomain()))
-      .orDieWith(fail => DatabaseCriticalFailure(fail.getMessage))
+      .map(_.map(_.toDomain))
+      .orDieWith(error => error)
   }
 
   override def update(clientId: ClientId, client: Client): IO[ClientError.NotFound, Unit] = {
@@ -60,13 +60,14 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
           .update(
             _.firstName -> lift(client.firstName.value),
             _.lastName -> lift(client.lastName.value),
+            _.birthDate -> lift(client.birthDate),
             _.phone -> lift(client.phone.value)
           )
       }
     }
 
     result
-      .orDieWith(error => DatabaseCriticalFailure(error.getMessage))
+      .orDieWith(error => error)
       .flatMap(rowsNo => ZIO.unless(rowsNo == 1)(ZIO.fail(ClientError.NotFound(clientId))))
       .unit
   }
@@ -81,7 +82,7 @@ case class ClientRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Cl
     }
 
     result
-      .orDieWith(error => DatabaseCriticalFailure(error.getMessage))
+      .orDieWith(error => error)
       .flatMap(rowsNo => ZIO.fail(ClientError.NotFound(clientId)).unless(rowsNo == 1))
       .unit
   }
