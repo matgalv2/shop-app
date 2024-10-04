@@ -13,7 +13,8 @@ object ClientId {
   def fromUUID(uuid: UUID) = ClientId.Unvalidated(uuid.toString)
 
   final case class Unvalidated(value: String) extends NotValidated[ClientId] {
-    def validate: Validation[String, ClientId] = uuid.apply(value).map(uuid => ClientId.apply(UUID.fromString(uuid)))
+    def validate: Validation[FailureDescription, ClientId] =
+      uuid.apply(value).map(uuid => ClientId.apply(UUID.fromString(uuid)))
 
     def unsafeValidation: ClientId = ClientId(UUID.fromString(value))
   }
