@@ -47,7 +47,7 @@ All APIs are described here:
 * Queries implementations - due to fact that quill queries return effects that can fail with SQLError all effects should die with DatabaseCriticalFailure
 
 ### 3. Data transformation
-* Mappers - Chimney library was utilized for transforming data types (Domain <-> DAO)
+* Mappers - Chimney library was utilized for transforming data types (Domain <-> DTO)
 
 ### 4. Domain
 * Validation - to ensure all data flowing through app is valid, all the objects are validated before being used. 
