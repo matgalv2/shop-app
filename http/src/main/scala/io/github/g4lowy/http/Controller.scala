@@ -8,7 +8,7 @@ import zio.interop.catz._
 
 object Controller {
 
-  def combineRoutes[R](route: HttpRoutes[RIO[R, *]], routes: HttpRoutes[RIO[R, *]]*): HttpRoutes[RIO[R, *]] = {
+  private def combineRoutes[R](route: HttpRoutes[RIO[R, *]], routes: HttpRoutes[RIO[R, *]]*): HttpRoutes[RIO[R, *]] = {
     import cats.syntax.all._
     routes.fold(route)(_ <+> _)
   }
@@ -23,8 +23,10 @@ object Controller {
   val server: ZIO[AppEnvironment & HttpServer, Throwable, Nothing] =
     for {
       combinedRoutes <- combinedRoutes
-      binding        <- HttpServer.bindServer(combinedRoutes)
-      _              <- ZIO.log(f"Starting server at ${binding.address}")
+      _              <- HttpServer.bindServer(combinedRoutes)
+      host           <- HttpServer.host
+      port           <- HttpServer.port
+      _              <- ZIO.log(f"Starting server at $host:$port")
       useForever     <- ZIO.never
     } yield useForever
 
