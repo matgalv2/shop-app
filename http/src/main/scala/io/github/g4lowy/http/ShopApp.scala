@@ -3,8 +3,8 @@ package io.github.g4lowy.http
 import io.github.g4lowy.client.infrastructure.repository.ClientRepositoryPostgres
 import io.github.g4lowy.http.AppConfig.configLive
 import io.github.g4lowy.http.database.DatabaseConfiguration
-import io.github.g4lowy.http.database.DatabaseConfiguration.{ postgresLive, quillPostgres }
-
+import io.github.g4lowy.http.database.DatabaseConfiguration.{ postgresLive, quillDataSource }
+import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import zio.{ Scope, ZIO, ZIOAppArgs, ZIOAppDefault }
 
 object ShopApp extends ZIOAppDefault {
@@ -17,9 +17,17 @@ object ShopApp extends ZIOAppDefault {
       server <- Controller.server
     } yield server
   }
-    .provideLayer(dependencies)
+//    .provideLayer(dependencies)
+    .provide(
+      configLive,
+      quillDataSource,
+      postgresLive,
+      ClientRepositoryPostgres.live,
+      ProductRepositoryPostgres.live,
+      HttpServer.live
+    )
 
   private val dependencies =
-    configLive >+> quillPostgres >+> postgresLive >+> ClientRepositoryPostgres.live ++ HttpServer.live
+    configLive >+> quillDataSource >+> postgresLive >+> ClientRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
 
 }
