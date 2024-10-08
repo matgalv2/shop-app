@@ -64,7 +64,7 @@ lazy val http = (project in file("http"))
       Dependencies.scalatest.scalatest
     )
   )
-  .dependsOn(clientDomain, clientInfrastructure, error)
+  .dependsOn(error, clientDomain, clientInfrastructure, productDomain, productInfrastructure)
 
 lazy val error = (project in file("/modules/common/error"))
   .settings(name := "error")
