@@ -25,7 +25,7 @@ object DatabaseConfiguration {
           .migrate()
     } yield migrations
 
-  val dataSource: ZIO[AppConfig, Nothing, HikariDataSource] =
+  private val dataSource: ZIO[AppConfig, Nothing, HikariDataSource] =
     ZIO.serviceWith[AppConfig] { config =>
       val hikariConfig = new HikariConfig()
       hikariConfig.setJdbcUrl(config.database.url)
@@ -35,7 +35,7 @@ object DatabaseConfiguration {
       new HikariDataSource(hikariConfig)
     }
 
-  val quillPostgres =
+  val quillDataSource =
     ZLayer.fromZIO(dataSource).flatMap(ds => Quill.DataSource.fromDataSource(ds.get))
 
   val postgresLive = Quill.Postgres.fromNamingStrategy(CamelCase)
