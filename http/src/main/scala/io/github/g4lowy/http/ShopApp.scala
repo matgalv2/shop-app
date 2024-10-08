@@ -12,12 +12,9 @@ object ShopApp extends ZIOAppDefault {
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     for {
       _      <- DatabaseConfiguration.flyway
-      config <- ZIO.service[AppConfig]
-      _      <- ZIO.log(config.http.host.toString)
       server <- Controller.server
     } yield server
   }
-//    .provideLayer(dependencies)
     .provide(
       configLive,
       quillDataSource,
