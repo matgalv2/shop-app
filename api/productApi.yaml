@@ -153,7 +153,6 @@ components:
         - productId
         - name
         - price
-        - description
 
     CreateProduct:
       type: object
@@ -168,7 +167,6 @@ components:
       required:
         - name
         - price
-        - description
 
     UpdateProduct:
       type: object
@@ -183,7 +181,6 @@ components:
       required:
         - name
         - price
-        - description
 
     ErrorResponse:
       type: object
