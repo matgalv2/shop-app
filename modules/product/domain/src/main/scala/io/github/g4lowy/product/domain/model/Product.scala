@@ -19,7 +19,7 @@ object Product {
         id          <- productId.validate
         name        <- name.validate
         price       <- price.validate
-        description <- validOrCheck(description)
+        description <- validOrCheck[Description, Description.Unvalidated](description)
       } yield Product(id, name, price, description)
 
     override def unsafeValidation: Product = Product(
