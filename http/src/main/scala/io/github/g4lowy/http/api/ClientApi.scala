@@ -18,10 +18,11 @@ import io.github.g4lowy.validation.extras._
 import io.github.g4lowy.http.converters.clients._
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.error.ErrorMessage._
+import io.github.g4lowy.http.AppEnvironment
 
 import java.util.UUID
 
-class ClientApi extends ClientsHandler[RIO[ClientApi.Environment, *]] {
+class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
 
   override def getAllClients(respond: GetAllClientsResponse.type)(): RIO[Environment, GetAllClientsResponse] =
     ClientService.getClients
