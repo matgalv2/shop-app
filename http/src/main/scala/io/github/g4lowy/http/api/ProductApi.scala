@@ -7,6 +7,7 @@ import http.generated.products.{
   GetAllProductsResponse,
   GetProductByIdResponse,
   ProductsHandler,
+  ProductsResource,
   UpdateProductResponse
 }
 import io.github.g4lowy.error.ErrorMessage._
@@ -14,11 +15,12 @@ import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi.Environment
 import io.github.g4lowy.http.service.ProductService
 import io.github.g4lowy.product.domain.repository.ProductRepository
-import zio.{ RIO, ZIO }
+import zio.{ RIO, Runtime, ZIO }
 import io.github.g4lowy.http.converters.products._
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.product.domain.model.ProductId
 import io.github.g4lowy.validation.extras.ZIOValidationOps
+import org.http4s.HttpRoutes
 
 import java.util.UUID
 
@@ -90,4 +92,14 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
 }
 object ProductApi {
   type Environment = ProductRepository
+
+  val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = {
+    import zio.interop.catz._
+    ZIO
+      .runtime[AppEnvironment]
+      .map { implicit r: Runtime[AppEnvironment] =>
+        new ProductsResource[RIO[AppEnvironment, *]]
+      }
+      .map(_.routes(new ProductApi()))
+  }
 }

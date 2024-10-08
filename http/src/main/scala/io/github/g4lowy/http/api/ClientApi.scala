@@ -2,6 +2,7 @@ package io.github.g4lowy.http.api
 
 import http.generated.clients.{
   ClientsHandler,
+  ClientsResource,
   CreateClientResponse,
   DeleteClientResponse,
   GetAllClientsResponse,
@@ -13,12 +14,13 @@ import io.github.g4lowy.client.domain.model.ClientId
 import io.github.g4lowy.client.domain.repository.ClientRepository
 import io.github.g4lowy.http.api.ClientApi.Environment
 import io.github.g4lowy.http.service.ClientService
-import zio.{ RIO, ZIO }
+import zio.{ RIO, Runtime, ZIO }
 import io.github.g4lowy.validation.extras._
 import io.github.g4lowy.http.converters.clients._
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
+import org.http4s.HttpRoutes
 
 import java.util.UUID
 
@@ -91,4 +93,15 @@ class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
 }
 object ClientApi {
   type Environment = ClientRepository
+
+  val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = {
+    import zio.interop.catz._
+
+    ZIO
+      .runtime[AppEnvironment]
+      .map { implicit r: Runtime[AppEnvironment] =>
+        new ClientsResource[RIO[AppEnvironment, *]]
+      }
+      .map(_.routes(new ClientApi()))
+  }
 }
