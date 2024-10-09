@@ -151,7 +151,7 @@ components:
           format: date
         phone:
           type: string
-          pattern: '^\+[0-9]{1,3} [0-9]{6,}$'
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
         createdAt:
           type: string
           x-scala-type: java.time.LocalDateTime
@@ -174,7 +174,7 @@ components:
           format: date
         phone:
           type: string
-          pattern: '^\+[0-9]{1,3} [0-9]{6,}$'
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
       required:
         - firstName
         - lastName
@@ -192,7 +192,7 @@ components:
           format: date
         phone:
           type: string
-          pattern: '^\+[0-9]{1,3} [0-9]{6,}$'
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
       required:
         - firstName
         - lastName
