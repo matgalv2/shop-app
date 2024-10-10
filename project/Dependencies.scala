@@ -33,6 +33,10 @@ object Dependencies {
     lazy val core = "com.comcast" %% "ip4s-core" % V.comcast
   }
 
+  object circe {
+    lazy val generic = "io.circe" %% "circe-generic" % V.circe
+  }
+
   object postgresql {
     lazy val postgresql = "org.postgresql" % "postgresql" % V.postgresql
   }
