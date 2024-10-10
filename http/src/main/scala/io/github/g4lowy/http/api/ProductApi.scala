@@ -33,7 +33,7 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
       .fromNotValidated(body.toDomain)
       .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
       .flatMap(ProductService.createProduct)
-      .map(productId => respond.Created(productId.value))
+      .map(productId => respond.Created(productId.toAPI))
       .merge
 
   override def getAllProducts(respond: GetAllProductsResponse.type)(): RIO[Environment, GetAllProductsResponse] =

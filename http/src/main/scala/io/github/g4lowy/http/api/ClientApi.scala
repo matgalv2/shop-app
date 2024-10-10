@@ -54,7 +54,7 @@ class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
       .fromNotValidated(body.toDomain)
       .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
       .flatMap(ClientService.createClient)
-      .map(clientId => respond.Created(clientId.value))
+      .map(clientId => respond.Created(clientId.toAPI))
       .merge
 
   override def updateClient(
