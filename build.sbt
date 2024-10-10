@@ -48,6 +48,8 @@ lazy val http = (project in file("http"))
       Dependencies.zio.config.magnolia,
       // Comcast
       Dependencies.comcast.core,
+      // Circe
+      Dependencies.circe.generic,
       // Cats
       Dependencies.cats.core,
       Dependencies.cats.effect,
