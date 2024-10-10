@@ -7,7 +7,7 @@ import io.github.g4lowy.client.domain.model.{ Client, ClientId, FirstName, LastN
 import io.github.g4lowy.test.utils.AppTestConfig
 import io.github.g4lowy.client.domain.repository.ClientRepository
 import io.github.g4lowy.client.infrastructure.model.ClientSQL
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ dataSource, postgresLive }
+import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ postgresLive, quillDataSource }
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.{ Validation, Validator }
@@ -129,16 +129,23 @@ object ClientRepositorySpec extends ZIOSpecDefault {
           } yield assertTrue(result.isFailure)
         }
       )
-    } @@ sequential @@ cleanTable
-  }.provide(AppTestConfig.testConfigLive, dataSource, postgresLive, ClientRepositoryPostgres.live)
+    } @@ sequential @@ cleanTableBeforeAll @@ cleanTableAfterEach
+  }.provide(AppTestConfig.integrationTestConfigLive, quillDataSource, postgresLive, ClientRepositoryPostgres.live)
 
-  private def cleanTable = TestAspect.after {
+  private def cleanTable =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
         quill.run(quote(querySchema[ClientSQL]("Clients").delete))
       }
       .unit
       .orDie
+
+  private def cleanTableAfterEach: TestAspect[Nothing, Quill.Postgres[CamelCase], Nothing, Any] = TestAspect.after {
+    cleanTable
+  }
+
+  private def cleanTableBeforeAll: TestAspect[Nothing, Quill.Postgres[CamelCase], Nothing, Any] = TestAspect.beforeAll {
+    cleanTable
   }
 
   private def makeClient(
