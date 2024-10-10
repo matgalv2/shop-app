@@ -2,10 +2,11 @@ package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{ CreateClient, GetClient, UpdateClient }
 import io.github.g4lowy.client.domain.model.{ Client, ClientId, FirstName, LastName, Phone }
+import io.github.g4lowy.client.domain
 import io.scalaland.chimney.dsl._
 
 import java.sql.Date
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.LocalDateTime
 
 object clients {
 
@@ -35,7 +36,7 @@ object clients {
         .transform
   }
 
-  implicit class ExcerptOps(private val client: Client) extends AnyVal {
+  implicit class ClientOps(private val client: Client) extends AnyVal {
     def toAPI: GetClient =
       client
         .into[GetClient]
@@ -46,5 +47,13 @@ object clients {
         .withFieldComputed(_.phone, _.phone.value)
         .transform
 
+  }
+
+  implicit class ClientIdOps(private val clientId: domain.model.ClientId) extends AnyVal {
+    def toAPI: http.generated.definitions.ClientId =
+      clientId
+        .into[http.generated.definitions.ClientId]
+        .withFieldRenamed(_.value, _.clientId)
+        .transform
   }
 }
