@@ -37,8 +37,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                $ref: '#/components/schemas/ClientId'
         400:
           description: Bad request
           content:
@@ -197,6 +196,15 @@ components:
         - firstName
         - lastName
         - phone
+
+    ClientId:
+      type: object
+      properties:
+        clientId:
+          type: string
+          format: uuid
+      required:
+        - clientId
 
     ErrorResponse:
       type: object
