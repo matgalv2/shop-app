@@ -3,6 +3,7 @@ package io.github.g4lowy.test.utils
 import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
+import io.getquill.mirrorContextWithQueryProbing._
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import zio.{ ZIO, ZLayer }
@@ -25,7 +26,7 @@ object TestDatabaseConfiguration {
           .migrate()
     } yield migrations
 
-  private val dataSourceHikari: ZIO[AppTestConfig, Nothing, HikariDataSource] =
+  private val dataSource: ZIO[AppTestConfig, Nothing, HikariDataSource] =
     ZIO.serviceWith[AppTestConfig] { config =>
       val hikariConfig = new HikariConfig()
       hikariConfig.setJdbcUrl(config.database.url)
@@ -35,8 +36,8 @@ object TestDatabaseConfiguration {
       new HikariDataSource(hikariConfig)
     }
 
-  val dataSource: ZLayer[AppTestConfig, Throwable, DataSource] =
-    ZLayer.fromZIO(dataSourceHikari).flatMap(ds => Quill.DataSource.fromDataSource(ds.get))
+  val quillDataSource: ZLayer[AppTestConfig, Throwable, DataSource] =
+    ZLayer.fromZIO(dataSource).flatMap(ds => Quill.DataSource.fromDataSource(ds.get))
 
   val postgresLive: ZLayer[DataSource, Nothing, Quill.Postgres[CamelCase.type]] =
     Quill.Postgres.fromNamingStrategy(CamelCase)
