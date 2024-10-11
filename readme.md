@@ -5,14 +5,14 @@ Simple CRUD REST-based application for managing online store. Database consists 
 
 
 ### Progress
-![](https://geps.dev/progress/40?dangerColor=800000&warningColor=ff9900&successColor=006600)
+![](https://geps.dev/progress/67?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 |                   | Clients | Products | Orders |
 |-------------------|---------|----------|--------|
-| Implementation    | ✅       | ❌        | ❌      |
-| Unit Tests        | ✅       | ❌        | ❌      |
-| Integration Tests | ✅       | ❌        | ❌      |
-| Acceptance Tests  | ❌       | ❌        | ❌      |
+| Implementation    | ✅       | ✅        | ❌      |
+| Unit Tests        | ✅       | ✅        | ❌      |
+| Integration Tests | ✅       | ✅        | ❌      |
+| Acceptance Tests  | ✅       | ✅        | ❌      |
 
 ## Technology & tools:
 Technology stack:
@@ -20,7 +20,7 @@ Technology stack:
 * ZIO 2
 * PostgreSQL
 * Flyway
-* HTTP4S
+* Http4s
 * Cats 2
 * OpenAPI
 
@@ -34,7 +34,7 @@ Tools & libraries:
 ## API
 All APIs are described here:
 * [Clients API](./api/clientApi.yaml)
-* [Products API]()
+* [Products API](./api/productApi.yaml)
 * [Orders API]()
 
 ## Design decisions:
