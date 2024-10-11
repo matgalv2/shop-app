@@ -32,7 +32,7 @@ abstract class ApiAcceptanceSpec
 
   override def afterEach: Unit = runEffect(cleanData.provide(dependencies))
 
-  protected def runEffect[E, A](effect: ZIO[Any, E, A]): A =
+  private def runEffect[E, A](effect: ZIO[Any, E, A]): A =
     Unsafe.unsafe { implicit unsafe =>
       Runtime.default.unsafe
         .run(effect)
