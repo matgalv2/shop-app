@@ -52,7 +52,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
 
   private val nonExistentId = "99999999-9999-9999-9999-2a035d9e16ba"
 
-  "Clients Api handler" must {
+  "Client API handler" must {
     "return response 201 Created for creating client (POST '/clients')" in {
       Given("the request with valid data")
       val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/clients")
@@ -81,7 +81,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       response.status shouldBe Status.BadRequest
     }
 
-    "return response 200 Ok for fetching clients" in {
+    "return response 200 Ok for fetching clients (GET '/clients')" in {
       Given("the request for fetching all clients")
       val request = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = uri"/clients")
 
@@ -92,7 +92,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       response.status shouldBe Status.Ok
     }
 
-    "return response 200 Ok for fetching client by id" in {
+    "return response 200 Ok for fetching client by id (GET '/clients/{clientId}')" in {
 
       val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/clients")
         .withEntity(validJson)
@@ -130,7 +130,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       returnedPhone shouldEqual "+48-123456789"
     }
 
-    "return response 404 Not found for fetching client by id" in {
+    "return response 404 Not found for fetching client by id (GET '/clients/{clientId}')" in {
       Given("request with nonexistent id")
       val id         = nonExistentId
       val getByIdUri = Uri.fromString(s"/clients/$id").getOrElse(uri"/clients/id")
@@ -141,7 +141,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       response.status shouldBe Status.NotFound
     }
 
-    "return response 204 No content for updating client by id" in {
+    "return response 204 No content for updating client by id (PUT '/clients/{clientId}')" in {
       val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/clients")
         .withEntity(validJson)
 
@@ -185,7 +185,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       returnedPhone shouldEqual "+48-123456"
     }
 
-    "return response 400 Bad request for updating client by id" in {
+    "return response 400 Bad request for updating client by id (PUT '/clients/{clientId}')" in {
       val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/clients")
         .withEntity(validJson)
 
@@ -210,7 +210,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       updateResponse.status shouldBe Status.BadRequest
     }
 
-    "return response 404 Not found for updating client by id" in {
+    "return response 404 Not found for updating client by id (PUT '/clients/{clientId}')" in {
       Given("the request for updating existing client by id with invalid body")
 
       val updateClientUri = Uri.fromString(s"/clients/$nonExistentId").getOrElse(uri"")
@@ -224,7 +224,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
       updateResponse.status shouldBe Status.NotFound
     }
 
-    "return response 204 No content for deleting client by id" in {
+    "return response 204 No content for deleting client by id (DELETE '/clients/{clientId}')" in {
       val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/clients")
         .withEntity(validJson)
 
@@ -265,7 +265,7 @@ class ClientApiAcceptanceSpec extends ApiAcceptanceSpec {
 //      Then("")
 //    }
 
-    "return response 404 Not found for deleting client by id" in {
+    "return response 404 Not found for deleting client by id (DELETE '/clients/{clientId}')" in {
       Given("the request for deleting nonexistent client by id")
       val deleteClientUri = Uri.fromString(s"/clients/$nonExistentId").getOrElse(uri"")
       val request         = Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = deleteClientUri)
