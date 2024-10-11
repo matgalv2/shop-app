@@ -11,7 +11,7 @@ object ProductId {
 
   def generate: ProductId.Unvalidated = ProductId.Unvalidated(UUID.randomUUID.toString)
 
-  def fromUUID(uuid: UUID) = ProductId.Unvalidated(uuid.toString)
+  def fromUUID(uuid: UUID) = ProductId(uuid)
 
   final case class Unvalidated(value: String) extends NotValidated[ProductId] {
 

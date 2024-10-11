@@ -45,30 +45,18 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
   override def getProductById(
     respond: GetProductByIdResponse.type
   )(productId: UUID): RIO[Environment, GetProductByIdResponse] =
-    ZIO
-      .fromNotValidated(ProductId.fromUUID(productId))
-      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-      .flatMap { productId =>
-        ProductService
-          .getProductById(productId)
-          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-      }
-      .map(_.toAPI)
+    ProductService
+      .getProductById(ProductId.fromUUID(productId))
+      .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _.toAPI)
       .map(respond.Ok)
       .merge
 
   override def deleteProduct(
     respond: DeleteProductResponse.type
   )(productId: UUID): RIO[Environment, DeleteProductResponse] =
-    ZIO
-      .fromNotValidated(ProductId.fromUUID(productId))
-      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-      .flatMap { id =>
-        ProductService
-          .deleteProduct(id)
-          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-      }
-      .as(respond.NoContent)
+    ProductService
+      .deleteProduct(ProductId.fromUUID(productId))
+      .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _ => respond.NoContent)
       .merge
 
   override def updateProduct(
@@ -78,14 +66,9 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
       .fromNotValidated(body.toDomain)
       .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
       .flatMap(product =>
-        ZIO
-          .fromNotValidated(ProductId.fromUUID(productId))
-          .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-          .flatMap(id =>
-            ProductService
-              .updateProduct(id, product)
-              .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-          )
+        ProductService
+          .updateProduct(ProductId.fromUUID(productId), product)
+          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
       )
       .as(respond.NoContent)
       .merge

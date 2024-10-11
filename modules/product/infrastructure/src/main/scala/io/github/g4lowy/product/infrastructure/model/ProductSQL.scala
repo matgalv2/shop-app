@@ -8,7 +8,7 @@ case class ProductSQL(productId: UUID, name: String, price: Double, description:
   def toDomain: Product =
     Product
       .Unvalidated(
-        productId   = ProductId.fromUUID(productId),
+        productId   = ProductId.Unvalidated(productId.toString),
         name        = Name.Unvalidated(name),
         price       = Price.Unvalidated(price),
         description = description.map(Description.Unvalidated.apply)
