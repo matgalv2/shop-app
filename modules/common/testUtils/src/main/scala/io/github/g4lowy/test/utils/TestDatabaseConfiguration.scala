@@ -26,18 +26,19 @@ object TestDatabaseConfiguration {
           .migrate()
     } yield migrations
 
-  private val dataSource: ZIO[AppTestConfig, Nothing, HikariDataSource] =
-    ZIO.serviceWith[AppTestConfig] { config =>
-      val hikariConfig = new HikariConfig()
-      hikariConfig.setJdbcUrl(config.database.url)
-      hikariConfig.setUsername(config.database.username)
-      hikariConfig.setPassword(config.database.password)
-      hikariConfig.setSchema(config.database.schema)
-      new HikariDataSource(hikariConfig)
-    }
+  private def createHikariDataSource(config: AppTestConfig) = {
+    val hikariConfig = new HikariConfig()
+    hikariConfig.setJdbcUrl(config.database.url)
+    hikariConfig.setUsername(config.database.username)
+    hikariConfig.setPassword(config.database.password)
+    hikariConfig.setSchema(config.database.schema)
+    new HikariDataSource(hikariConfig)
+  }
 
-  val quillDataSource: ZLayer[AppTestConfig, Throwable, DataSource] =
-    ZLayer.fromZIO(dataSource).flatMap(ds => Quill.DataSource.fromDataSource(ds.get))
+  val dataSource: ZIO[AppTestConfig, Throwable, DataSource] =
+    ZIO.serviceWith[AppTestConfig](config => createHikariDataSource(config))
+
+  val dataSourceLive: ZLayer[AppTestConfig, Throwable, DataSource] = ZLayer.fromZIO(dataSource)
 
   val postgresLive: ZLayer[DataSource, Nothing, Quill.Postgres[CamelCase.type]] =
     Quill.Postgres.fromNamingStrategy(CamelCase)

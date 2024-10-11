@@ -7,12 +7,12 @@ import io.github.g4lowy.client.domain.model.{ Client, ClientId, FirstName, LastN
 import io.github.g4lowy.test.utils.AppTestConfig
 import io.github.g4lowy.client.domain.repository.ClientRepository
 import io.github.g4lowy.client.infrastructure.model.ClientSQL
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ postgresLive, quillDataSource }
+import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ dataSource, postgresLive }
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.{ Validation, Validator }
 import zio.test.TestAspect.sequential
-import zio.{ Chunk, Scope, ZIO }
+import zio.{ Chunk, Scope, ZIO, ZLayer }
 import zio.test._
 
 import java.sql.Date
@@ -130,7 +130,12 @@ object ClientRepositorySpec extends ZIOSpecDefault {
         }
       )
     } @@ sequential @@ cleanTableBeforeAll @@ cleanTableAfterEach
-  }.provide(AppTestConfig.integrationTestConfigLive, quillDataSource, postgresLive, ClientRepositoryPostgres.live)
+  }.provide(
+    AppTestConfig.integrationTestConfigLive,
+    ZLayer.fromZIO(dataSource),
+    postgresLive,
+    ClientRepositoryPostgres.live
+  )
 
   private def cleanTable =
     ZIO
