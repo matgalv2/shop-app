@@ -5,7 +5,7 @@ Simple CRUD REST-based application for managing online store. Database consists 
 
 
 ### Progress
-![](https://geps.dev/progress/67?dangerColor=800000&warningColor=ff9900&successColor=006600)
+![](https://geps.dev/progress/80?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 |                   | Clients | Products | Orders |
 |-------------------|---------|----------|--------|
