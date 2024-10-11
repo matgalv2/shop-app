@@ -35,15 +35,9 @@ class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
   override def getClientById(
     respond: GetClientByIdResponse.type
   )(clientId: UUID): RIO[Environment, GetClientByIdResponse] =
-    ZIO
-      .fromNotValidated(ClientId.fromUUID(clientId))
-      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-      .flatMap { clientId =>
-        ClientService
-          .getClientById(clientId)
-          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-      }
-      .map(_.toAPI)
+    ClientService
+      .getClientById(ClientId.fromUUID(clientId))
+      .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _.toAPI)
       .map(respond.Ok)
       .merge
 
@@ -64,14 +58,9 @@ class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
       .fromNotValidated(body.toDomain)
       .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
       .flatMap(client =>
-        ZIO
-          .fromNotValidated(ClientId.fromUUID(clientId))
-          .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-          .flatMap(id =>
-            ClientService
-              .updateClient(id, client)
-              .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-          )
+        ClientService
+          .updateClient(ClientId.fromUUID(clientId), client)
+          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
       )
       .as(respond.NoContent)
       .merge
@@ -79,15 +68,9 @@ class ClientApi extends ClientsHandler[RIO[AppEnvironment, *]] {
   override def deleteClient(
     respond: DeleteClientResponse.type
   )(clientId: UUID): RIO[Environment, DeleteClientResponse] =
-    ZIO
-      .fromNotValidated(ClientId.fromUUID(clientId))
-      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
-      .flatMap { id =>
-        ClientService
-          .deleteClient(id)
-          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
-      }
-      .as(respond.NoContent)
+    ClientService
+      .deleteClient(ClientId.fromUUID(clientId))
+      .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _ => respond.NoContent)
       .merge
 
 }

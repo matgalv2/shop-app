@@ -17,7 +17,7 @@ case class ClientSQL(
   def toDomain: Client =
     Client
       .Unvalidated(
-        clientId  = ClientId.fromUUID(clientId),
+        clientId  = ClientId.Unvalidated(clientId.toString),
         firstName = FirstName.Unvalidated(firstName),
         lastName  = LastName.Unvalidated(lastName),
         birthDate = birthDate,
