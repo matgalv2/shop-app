@@ -63,12 +63,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetClient'
-        400:
-          description: Client id is invalid
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
         404:
           description: Not found
           content:
