@@ -26,11 +26,11 @@ abstract class ApiAcceptanceSpec
 
   val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]]
 
-  def cleanTable: URIO[Quill.Postgres[CamelCase], Unit]
+  def cleanData: URIO[Quill.Postgres[CamelCase], Unit]
 
-  override def beforeAll: Unit = runEffect(cleanTable.provide(dependencies))
+  override def beforeAll: Unit = runEffect(cleanData.provide(dependencies))
 
-  override def afterEach: Unit = runEffect(cleanTable.provide(dependencies))
+  override def afterEach: Unit = runEffect(cleanData.provide(dependencies))
 
   protected def runEffect[E, A](effect: ZIO[Any, E, A]): A =
     Unsafe.unsafe { implicit unsafe =>
