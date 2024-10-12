@@ -13,7 +13,7 @@ object AppConfig {
   private val appConfigDescriptor: ConfigDescriptor[AppConfig] =
     (ConfigDescriptor.nested("http")(httpDesc) <*> ConfigDescriptor.nested("database")(databaseDesc)).to[AppConfig]
 
-  val configLive: ULayer[AppConfig] = TypesafeConfig.fromResourcePath(appConfigDescriptor).orDie
+  val live: ULayer[AppConfig] = TypesafeConfig.fromResourcePath(appConfigDescriptor).orDie
 
   final case class Http(port: Port, host: Host)
 

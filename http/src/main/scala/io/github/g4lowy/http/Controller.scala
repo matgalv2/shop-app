@@ -2,6 +2,7 @@ package io.github.g4lowy.http
 
 import io.github.g4lowy.http.api.{ ClientApi, ProductApi }
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
+import org.http4s.server.Server
 import org.http4s.HttpRoutes
 import zio.{ &, RIO, ZIO }
 import zio.interop.catz._
@@ -20,14 +21,13 @@ object Controller {
       combinedRoutes = combineRoutes(clientsRoutes, productsRoutes)
     } yield combinedRoutes.orNotFound
 
-  val server: ZIO[AppEnvironment & HttpServer, Throwable, Nothing] =
+  val httpServer: ZIO[AppEnvironment & HttpServer, Throwable, Server[RIO[AppEnvironment, *]]] =
     for {
-      combinedRoutes <- combinedRoutes
-      _              <- HttpServer.bindServer(combinedRoutes)
-      host           <- HttpServer.host
-      port           <- HttpServer.port
-      _              <- ZIO.log(f"Starting server at $host:$port")
-      useForever     <- ZIO.never
-    } yield useForever
+      routes <- combinedRoutes
+      server <- HttpServer.bindServer(routes)
+      host   <- HttpServer.host
+      port   <- HttpServer.port
+      _      <- ZIO.log(f"Starting server at $host:$port")
+    } yield server
 
 }

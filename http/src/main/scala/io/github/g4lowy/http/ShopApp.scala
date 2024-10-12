@@ -1,7 +1,6 @@
 package io.github.g4lowy.http
 
 import io.github.g4lowy.client.infrastructure.repository.ClientRepositoryPostgres
-import io.github.g4lowy.http.AppConfig.configLive
 import io.github.g4lowy.http.database.DatabaseConfiguration
 import io.github.g4lowy.http.database.DatabaseConfiguration.{ postgresLive, quillDataSource }
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
@@ -11,12 +10,13 @@ object ShopApp extends ZIOAppDefault {
 
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     for {
-      _      <- DatabaseConfiguration.flyway
-      server <- Controller.server
-    } yield server
+      _          <- DatabaseConfiguration.flyway
+      _          <- Controller.httpServer
+      useForever <- ZIO.never
+    } yield useForever
   }
     .provide(
-      configLive,
+      AppConfig.live,
       quillDataSource,
       postgresLive,
       ClientRepositoryPostgres.live,
@@ -25,6 +25,6 @@ object ShopApp extends ZIOAppDefault {
     )
 
   private val dependencies =
-    configLive >+> quillDataSource >+> postgresLive >+> ClientRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
+    AppConfig.live >+> quillDataSource >+> postgresLive >+> ClientRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
 
 }
