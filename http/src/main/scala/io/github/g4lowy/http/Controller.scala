@@ -1,6 +1,6 @@
 package io.github.g4lowy.http
 
-import io.github.g4lowy.http.api.{ ClientApi, ProductApi }
+import io.github.g4lowy.http.api.{ CustomerApi, ProductApi }
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.Server
 import org.http4s.HttpRoutes
@@ -16,9 +16,9 @@ object Controller {
 
   private val combinedRoutes =
     for {
-      clientsRoutes  <- ClientApi.routes
-      productsRoutes <- ProductApi.routes
-      combinedRoutes = combineRoutes(clientsRoutes, productsRoutes)
+      customersRoutes <- CustomerApi.routes
+      productsRoutes  <- ProductApi.routes
+      combinedRoutes = combineRoutes(customersRoutes, productsRoutes)
     } yield combinedRoutes.orNotFound
 
   val httpServer: ZIO[AppEnvironment & HttpServer, Throwable, Server[RIO[AppEnvironment, *]]] =

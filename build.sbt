@@ -18,13 +18,14 @@ val common = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(http, validation, error, clientDomain, clientInfrastructure)
-  .dependsOn(http, validation, error, clientDomain, clientInfrastructure)
+  .aggregate(http, validation, error, customerDomain, customerInfrastructure, productDomain, productInfrastructure)
+  .dependsOn(http, validation, error, customerDomain, customerInfrastructure, productDomain, productInfrastructure)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
 
 def generateServers(files: String*) =
   files.map(filename => ScalaServer(file(s"api/$filename.yaml"), pkg = "http.generated", framework = "http4s")).toList
 
-lazy val apiSpecFiles = List("clientApi", "productApi")
+lazy val apiSpecFiles = List("customerApi", "productApi")
 
 lazy val http = (project in file("http"))
   .settings(common *)
@@ -66,7 +67,7 @@ lazy val http = (project in file("http"))
       Dependencies.scalatest.scalatest
     )
   )
-  .dependsOn(error, clientDomain, clientInfrastructure, productDomain, productInfrastructure)
+  .dependsOn(error, customerDomain, customerInfrastructure, productDomain, productInfrastructure)
 
 lazy val error = (project in file("/modules/common/error"))
   .settings(name := "error")
@@ -88,21 +89,21 @@ lazy val testUtils = (project in file("/modules/common/testUtils"))
   .settings(libraryDependencies += Dependencies.zio.config.magnolia)
   .settings(libraryDependencies += Dependencies.postgresql.postgresql)
 
-lazy val clientDomain = (project in file("/modules/client/domain"))
-  .settings(name := "client-domain")
+lazy val customerDomain = (project in file("/modules/customer/domain"))
+  .settings(name := "customer-domain")
   .settings(common *)
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
   .dependsOn(validation)
 
-lazy val clientInfrastructure = (project in file("/modules/client/infrastructure"))
-  .settings(name := "client-infrastructure")
+lazy val customerInfrastructure = (project in file("/modules/customer/infrastructure"))
+  .settings(name := "customer-infrastructure")
   .settings(common *)
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.quill.zio)
   .settings(libraryDependencies += Dependencies.postgresql.postgresql)
-  .dependsOn(clientDomain, error, testUtils)
+  .dependsOn(customerDomain, error, testUtils)
 
 lazy val productDomain = (project in file("/modules/product/domain"))
   .settings(name := "product-domain")
@@ -123,6 +124,10 @@ lazy val productInfrastructure = (project in file("/modules/product/infrastructu
 lazy val orderDomain = (project in file("/modules/order/domain"))
   .settings(name := "order-domain")
   .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.cats.core)
+  .dependsOn(validation, productDomain)
 
 lazy val orderInfrastructure = (project in file("/modules/order/infrastructure"))
   .settings(name := "order-infrastructure")

@@ -1,0 +1,211 @@
+openapi: "3.0.3"
+info:
+  title: Shop App (Customer API)
+  version: 0.0.1
+  contact:
+    name: Mateusz
+    url: https://github.com/matgalv2
+servers:
+  - url: http://localhost:8080
+    description: local dev
+paths:
+  /customers:
+    get:
+      operationId: getAllCustomers
+      x-jvm-package: customers
+      responses:
+        200:
+          description: Fetches a list of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetCustomer"
+    post:
+      operationId: createCustomer
+      x-jvm-package: customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomer"
+      responses:
+        201:
+          description: Successfully created customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerId'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /customers/{customerId}:
+    get:
+      operationId: getCustomerById
+      x-jvm-package: customers
+      parameters:
+        - in: path
+          name: customerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Fetches a customer by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCustomer'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      operationId: updateCustomer
+      x-jvm-package: customers
+      parameters:
+        - in: path
+          name: customerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomer"
+      responses:
+        204:
+          description: Successfully updated customer
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      operationId: deleteCustomer
+      x-jvm-package: customers
+      parameters:
+        - in: path
+          name: customerId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        204:
+          description: Successfully deleted customer
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  schemas:
+    GetCustomer:
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        phone:
+          type: string
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
+        createdAt:
+          type: string
+          x-scala-type: java.time.LocalDateTime
+      required:
+        - customerId
+        - firstName
+        - lastName
+        - phone
+        - createdAt
+
+    CreateCustomer:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        phone:
+          type: string
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
+      required:
+        - firstName
+        - lastName
+        - phone
+
+    UpdateCustomer:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        phone:
+          type: string
+          pattern: '^\+[0-9]{1,3}-[0-9]{6,}$'
+      required:
+        - firstName
+        - lastName
+        - phone
+
+    CustomerId:
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+      required:
+        - customerId
+
+    ErrorResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+        - messages

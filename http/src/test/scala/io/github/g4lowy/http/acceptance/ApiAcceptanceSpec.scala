@@ -3,7 +3,7 @@ package io.github.g4lowy.http.acceptance
 import io.circe.Json
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.github.g4lowy.client.infrastructure.repository.ClientRepositoryPostgres
+import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPostgres
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import io.github.g4lowy.test.utils.TestDatabaseConfiguration.postgresLive
@@ -43,7 +43,7 @@ abstract class ApiAcceptanceSpec
     TestDatabaseConfiguration.dataSource.provide(AppTestConfig.acceptanceTestConfigLive)
   )
   private val dependencies =
-    ZLayer.succeed(dataSource) >+> postgresLive >+> ClientRepositoryPostgres.live ++ ProductRepositoryPostgres.live
+    ZLayer.succeed(dataSource) >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live
 
   protected def handleRequest(request: Request[RIO[AppEnvironment, *]]): Response[RIO[AppEnvironment, *]] =
     runEffect {
