@@ -7,12 +7,12 @@ Simple CRUD REST-based application for managing online store. Database consists 
 ### Progress
 ![](https://geps.dev/progress/80?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
-|                   | Clients | Products | Orders |
-|-------------------|---------|----------|--------|
-| Implementation    | ✅       | ✅        | ❌      |
-| Unit Tests        | ✅       | ✅        | ❌      |
-| Integration Tests | ✅       | ✅        | ❌      |
-| Acceptance Tests  | ✅       | ✅        | ❌      |
+|                   | Customers | Products | Orders |
+|-------------------|-----------|----------|--------|
+| Implementation    | ✅         | ✅        | ❌      |
+| Unit Tests        | ✅         | ✅        | ❌      |
+| Integration Tests | ✅         | ✅        | ❌      |
+| Acceptance Tests  | ✅         | ✅        | ❌      |
 
 ## Technology & tools:
 Technology stack:
@@ -33,7 +33,7 @@ Tools & libraries:
 
 ## API
 All APIs are described here:
-* [Clients API](./api/clientApi.yaml)
+* [Customers API](./api/customerApi.yaml)
 * [Products API](./api/productApi.yaml)
 * [Orders API]()
 
