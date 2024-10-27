@@ -33,7 +33,7 @@ paths:
               $ref: "#/components/schemas/CreateProduct"
       responses:
         201:
-          description: Fetches a product by product id
+          description: Order was successfully created
           content:
             application/json:
               schema:
