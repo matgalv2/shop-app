@@ -27,9 +27,4 @@ object ShopApp extends ZIOAppDefault {
   private val dependencies =
     AppConfig.live >+> quillDataSource >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
 
-  /*
-    TODO:
-      1. Rename entity Client to Customer
-      2. Rename table OrdersProducts to OrdersDetails
-   */
 }
