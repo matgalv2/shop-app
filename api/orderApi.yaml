@@ -1,0 +1,284 @@
+openapi: "3.0.3"
+info:
+  title: Shop App (Order API)
+  version: 0.0.1
+  contact:
+    name: Mateusz
+    url: https://github.com/matgalv2
+servers:
+  - url: http://localhost:8080
+    description: local dev
+paths:
+  /orders:
+    get:
+      operationId: getAllOrders
+      x-jvm-package: orders
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Fetches a list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetOrder"
+    post:
+      operationId: createOrder
+      x-jvm-package: orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrder"
+      responses:
+        201:
+          description: Fetches a product by product id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderId"
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}:
+    get:
+      operationId: getOrderById
+      x-jvm-package: orders
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      responses:
+        200:
+          description: Fetches an order by order id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetOrder'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      operationId: patchOrder
+      x-jvm-package: orders
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchOrder"
+      responses:
+        204:
+          description: Successfully updated order's status
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    OrderDetail:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int32
+        pricePerUnit:
+          type: number
+          x-scala-type: scala.math.BigDecimal
+      required:
+        - orderId
+        - productId
+        - quantity
+        - pricePerUnit
+
+    Address:
+      type: object
+      properties:
+        addressId:
+          type: string
+          format: uuid
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        zipCode:
+          type: string
+        building:
+          type: string
+        apartment:
+          type: string
+      required:
+        - addressId
+        - country
+        - city
+        - street
+        - zipCode
+        - building
+
+    GetOrder:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        status:
+          type: string
+          enum:
+            - CREATED
+            - CANCELLED
+            - PAID
+            - IN_PROGRESS
+            - SENT
+            - DELIVERED
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDetail'
+        totalCost:
+          type: number
+          format: double
+        paymentType:
+          type: string
+          enum: [BANK_TRANSFER, CARD, ON_DELIVERY]
+        paymentAddress:
+          $ref: '#/components/schemas/Address'
+        shipmentType:
+          type: string
+          enum: [COURIER, BOX, ON_PLACE]
+        shipmentAddress:
+          $ref: '#/components/schemas/Address'
+      required:
+        - orderId
+        - customerId
+        - status
+        - totalCost
+        - paymentType
+        - paymentAddress
+        - shipmentType
+        - products
+
+    CreateOrder:
+      type: object
+      properties:
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        productsIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductId'
+        paymentType:
+          type: string
+          enum: [ BANK_TRANSFER, CARD, ON_DELIVERY ]
+        paymentAddress:
+          $ref: '#/components/schemas/Address'
+        shipmentType:
+          type: string
+          enum: [ COURIER, BOX, ON_PLACE ]
+        shipmentAddress:
+          $ref: '#/components/schemas/Address'
+      required:
+        - customerId
+        - productsIds
+        - paymentType
+        - paymentAddress
+        - shipmentType
+
+    PatchOrder:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - CREATED
+            - CANCELLED
+            - PAID
+            - IN_PROGRESS
+            - SENT
+            - DELIVERED
+      required:
+        - status
+
+    CustomerId:
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+      required:
+        - customerId
+
+    ProductId:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+      required:
+        - productId
+
+    OrderId:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+      required:
+        - orderId
+
+    ErrorResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: string
+      required:
+        - messages
