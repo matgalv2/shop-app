@@ -12,6 +12,7 @@ CREATE TABLE Orders(
     status              ORDER_STATUS    NOT NULL,
 
     PRIMARY KEY (orderId),
+    FOREIGN KEY (paymentAddressId) REFERENCES Addresses (addressId),
     FOREIGN KEY (shipmentAddressId) REFERENCES Addresses (addressId),
     FOREIGN KEY (customerId) REFERENCES Customers (customerId)
 );
