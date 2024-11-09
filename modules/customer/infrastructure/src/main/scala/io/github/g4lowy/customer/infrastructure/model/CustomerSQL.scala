@@ -14,7 +14,7 @@ case class CustomerSQL(
   phone: String,
   createdAt: LocalDateTime
 ) {
-  def toDomain: Customer =
+  def toUnvalidated: Customer.Unvalidated =
     Customer
       .Unvalidated(
         customerId = CustomerId.Unvalidated(customerId.toString),
@@ -24,7 +24,8 @@ case class CustomerSQL(
         phone      = Phone.Unvalidated(phone),
         createdAt  = createdAt
       )
-      .unsafeValidation
+
+  def toDomain: Customer = toUnvalidated.unsafeValidation
 }
 
 object CustomerSQL {
