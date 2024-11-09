@@ -27,4 +27,12 @@ object ShopApp extends ZIOAppDefault {
   private val dependencies =
     AppConfig.live >+> quillDataSource >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
 
+  /*
+
+   TODO:
+    1. add contact info to order
+    2. add createdAt field to order
+    3. implement pagination for all entities
+
+   */
 }
