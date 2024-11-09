@@ -86,6 +86,12 @@ object Validator {
   def max(value: Double): Validator[Double] =
     new Validator(_ <= value, s"value needs to be lesser than or equal to $value")
 
+  def min(value: BigDecimal): Validator[BigDecimal] =
+    new Validator(_ >= value, s"value needs to be greater than or equal to $value")
+
+  def max(value: BigDecimal): Validator[BigDecimal] =
+    new Validator(_ <= value, s"value needs to be lesser than or equal to $value")
+
   def inRange(range: Range): Validator[Int] =
     new Validator(value => range.contains(value), s"value needs to be in range $range")
 
