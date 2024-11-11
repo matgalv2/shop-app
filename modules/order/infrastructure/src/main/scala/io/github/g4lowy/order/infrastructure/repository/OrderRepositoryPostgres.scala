@@ -1,6 +1,6 @@
 package io.github.g4lowy.order.infrastructure.repository
 
-import io.getquill.{ CamelCase, EntityQuery, QAC }
+import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
 import io.github.g4lowy.order.domain.model.{ Order, OrderError, OrderId, OrderStatus }
@@ -14,7 +14,7 @@ import io.github.g4lowy.order.infrastructure.model.{
   ShipmentTypeSQL
 }
 import org.postgresql.util.PGobject
-import zio.{ IO, UIO, URIO, ZIO }
+import zio.{ IO, UIO,  URLayer, ZIO, ZLayer }
 
 import java.sql.{ SQLException, Types }
 import java.util.UUID
@@ -22,6 +22,11 @@ import java.util.UUID
 case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends OrderRepository {
 
   import quill._
+
+  private def ordersOffsetAndLimit(offset: Int, limit: Int) =
+    quote {
+      querySchema[OrderSQL]("Orders").drop(lift(offset)).take(lift(limit))
+    }
 
   private val orders = quote {
     querySchema[OrderSQL]("Orders")
@@ -118,50 +123,51 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       .orDie
   }
 
-  override def getAll: UIO[List[Order]] = transaction {
-    val data: UIO[List[(OrderSQL, CustomerSQL, AddressSQL, Option[AddressSQL])]] = run {
-      quote {
-        for {
-          order          <- orders
-          customer       <- customers if customer.customerId == order.customerId
-          paymentAddress <- addresses if paymentAddress.addressId == order.paymentAddressId
-          shipmentAddress <- orders
-            .leftJoin(addresses)
-            .on((order, address) => order.shipmentAddressId.contains(address.addressId))
-        } yield (order, customer, paymentAddress, shipmentAddress._2)
-      }
-    }.orDie
+  override def getAll(offset: Int, limit: Int): UIO[List[Order]] =
+    transaction {
 
-    data
-      .flatMap(list =>
-        ZIO.foreachPar(list) {
-          case (
-                orderSQL: OrderSQL,
-                customerSQL: CustomerSQL,
-                paymentAddressSQL: AddressSQL,
-                shipmentAddressSQL: Option[AddressSQL]
-              ) =>
-            run(quote(ordersDetails.filter(_.orderId == orderSQL.orderId))).map(details =>
-              orderSQL.toDomain(customerSQL, paymentAddressSQL, shipmentAddressSQL, details)
-            )
+      val data: ZIO[Any, SQLException, List[(((OrderSQL, CustomerSQL), AddressSQL), Option[AddressSQL])]] = run {
+        quote {
+          orders
+            .join(customers)
+            .on({ case (order, customer) =>
+              order.customerId == customer.customerId
+            })
+            .join(addresses)
+            .on({ case ((order, _), paymentAddress) => order.paymentAddressId == paymentAddress.addressId })
+            .leftJoin(addresses)
+            .on({ case (((order, _), _), shipmentAddress) =>
+              order.shipmentAddressId.contains(shipmentAddress.addressId)
+            })
         }
-      )
-  }.orDie
+      }
+
+      data
+        .flatMap(list =>
+          ZIO.foreachPar(list) { case (((orderSQL, customerSQL), paymentAddressSQL), shipmentAddressSQLOpt) =>
+            run(quote(ordersDetails.filter(_.orderId == lift(orderSQL.orderId)))).map(details =>
+              orderSQL.toDomain(customerSQL, paymentAddressSQL, shipmentAddressSQLOpt, details)
+            )
+          }
+        )
+    }.orDie
 
   override def getById(orderId: OrderId): IO[OrderError.NotFound, Order] =
     transaction {
       val result = for {
-        orderOpt <- run(quote(orders.filter(_.orderId == orderId.value))).map(_.headOption).orDie
+        orderOpt <- run(quote(orders.filter(_.orderId == lift(orderId.value)))).map(_.headOption).orDie
         order <- orderOpt match {
           case Some(value) => ZIO.succeed(value)
           case None        => ZIO.fail(OrderError.NotFound(orderId))
         }
-        customerOpt <- run(quote(customers.filter(_.customerId == order.customerId))).map(_.headOption).orDie
+        customerOpt <- run(quote(customers.filter(_.customerId == lift(order.customerId)))).map(_.headOption).orDie
         customer <- getOrDieWithMessage(
           customerOpt,
           errorMessageTemplate("Customer", order.customerId, "order", order.orderId)
         )
-        paymentAddressOpt <- run(quote(addresses.filter(_.addressId == order.paymentAddressId))).map(_.headOption).orDie
+        paymentAddressOpt <- run(quote(addresses.filter(_.addressId == lift(order.paymentAddressId))))
+          .map(_.headOption)
+          .orDie
         paymentAddress <- getOrDieWithMessage(
           paymentAddressOpt,
           errorMessageTemplate("payment address", order.paymentAddressId, "order", order.orderId)
@@ -169,14 +175,14 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
 
         shipmentAddressOpt <- order.shipmentAddressId match {
           case Some(shipmentAddressId) =>
-            run(quote(addresses.filter(_.addressId == shipmentAddressId))).map(_.headOption).orDie.flatMap {
+            run(quote(addresses.filter(_.addressId == lift(shipmentAddressId)))).map(_.headOption).orDie.flatMap {
               case Some(foundAddress) => ZIO.succeed(Option(foundAddress))
               case None =>
                 ZIO.dieMessage(errorMessageTemplate("shipment address", shipmentAddressId, "order", order.orderId))
             }
           case None => ZIO.none
         }
-        orderDetails <- run(quote(ordersDetails.filter(orderDetail => orderDetail.orderId == order.orderId))).orDie
+        orderDetails <- run(quote(ordersDetails.filter(_.orderId == lift(order.orderId)))).orDie
 
       } yield order.toDomain(customer, paymentAddress, shipmentAddressOpt, orderDetails)
       result.either
@@ -187,16 +193,17 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
 
   override def updateStatus(orderId: OrderId, orderStatus: OrderStatus): IO[OrderError, Unit] = {
 
-    val fetchOrder = orders.filter(_.orderId == orderId.value)
+    val fetchOrder = quote(orders.filter(_.orderId == lift(orderId.value)))
     val result     = run(quote(fetchOrder)).orDie
 
     transaction {
       result.flatMap { returnedOrders =>
         returnedOrders.headOption match {
           case Some(order) if order.status.toDomain.canBeReplacedBy(orderStatus) =>
-            run(quote(fetchOrder.update(_.status -> OrderStatusSQL.fromDomain(orderStatus)))).orDie
-          case Some(_) => ZIO.fail[OrderError](OrderError.InvalidStatus(orderId, orderStatus))
-          case None    => ZIO.fail[OrderError](OrderError.NotFound(orderId))
+            val orderStatusSql = OrderStatusSQL.fromDomain(orderStatus)
+            run(quote(fetchOrder.update(_.status -> lift(orderStatusSql)))).orDie
+          case Some(_) => ZIO.fail(OrderError.InvalidStatus(orderId, orderStatus))
+          case None    => ZIO.fail(OrderError.NotFound(orderId))
         }
       }.either
     }.orDie.flatMap {
@@ -213,4 +220,10 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
 
   private val errorMessageTemplate = (field: String, fieldId: UUID, entity: String, entityId: UUID) =>
     s"$field with id:$fieldId was not found for $entity with id:$entityId"
+
+}
+
+object OrderRepositoryPostgres {
+  val live: URLayer[Quill.Postgres[CamelCase], OrderRepositoryPostgres] =
+    ZLayer.fromFunction(OrderRepositoryPostgres.apply _)
 }
