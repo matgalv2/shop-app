@@ -67,7 +67,16 @@ lazy val http = (project in file("http"))
       Dependencies.scalatest.scalatest
     )
   )
-  .dependsOn(error, customerDomain, customerInfrastructure, productDomain, productInfrastructure)
+  .dependsOn(
+    error,
+    unionTypes,
+    customerDomain,
+    customerInfrastructure,
+    productDomain,
+    productInfrastructure,
+    orderDomain,
+    orderInfrastructure
+  )
 
 lazy val error = (project in file("/modules/common/error"))
   .settings(name := "error")
@@ -88,6 +97,9 @@ lazy val testUtils = (project in file("/modules/common/testUtils"))
   .settings(libraryDependencies += Dependencies.zio.config.typesafeConfig)
   .settings(libraryDependencies += Dependencies.zio.config.magnolia)
   .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+
+lazy val unionTypes = (project in file("/modules/common/unionTypes"))
+  .settings(name := "union-types")
 
 lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(name := "customer-domain")
