@@ -1,28 +1,53 @@
 package io.github.g4lowy.http.service
 
-import io.github.g4lowy.customer.domain.model.{ Customer, CustomerError, CustomerId }
+import http.generated.definitions.{ CreateCustomer, GetCustomer, UpdateCustomer }
+import io.github.g4lowy.customer.domain.model.{ CustomerError, CustomerId }
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
-import zio.{ URIO, ZIO }
+import zio.{ RIO, ZIO }
+import io.github.g4lowy.http.converters.customers._
+import io.github.g4lowy.union.types.Union2
+import io.github.g4lowy.validation.extras.ZIOValidationOps
+import io.github.g4lowy.validation.validators.Validator
+
+import java.util.UUID
 
 object CustomerService {
 
-  def getCustomers: URIO[CustomerRepository, List[Customer]] =
+  def getCustomers: RIO[CustomerRepository, Vector[GetCustomer]] =
     CustomerRepository.getAll
+      .map(_.map(_.toAPI))
+      .map(_.toVector)
 
-  def getCustomerById(customerId: CustomerId): ZIO[CustomerRepository, CustomerError.NotFound, Customer] =
-    CustomerRepository.getById(customerId)
+  def getCustomerById(customerId: UUID): ZIO[CustomerRepository, CustomerError.NotFound, GetCustomer] =
+    CustomerRepository.getById(CustomerId.fromUUID(customerId)).map(_.toAPI)
 
-  def createCustomer(customer: Customer): URIO[CustomerRepository, CustomerId] = CustomerRepository.create(customer)
+  def createCustomer(
+    createCustomer: CreateCustomer
+  ): ZIO[CustomerRepository, Validator.FailureDescription, http.generated.definitions.CustomerId] =
+    ZIO
+      .fromNotValidated(createCustomer.toDomain)
+      .flatMap(CustomerRepository.create)
+      .map(_.toAPI)
 
   def updateCustomer(
-    customerId: CustomerId,
-    customer: Customer
-  ): ZIO[CustomerRepository, CustomerError.NotFound, Unit] =
-    CustomerRepository.update(customerId, customer)
+    customerId: UUID,
+    updateCustomer: UpdateCustomer
+  ): ZIO[CustomerRepository, Union2[Validator.FailureDescription, CustomerError.NotFound], Unit] =
+    ZIO
+      .fromNotValidated(updateCustomer.toDomain)
+      .mapError(error => Union2.First(error))
+      .flatMap { customer =>
+        val domainId = CustomerId.fromUUID(customerId)
+        CustomerRepository
+          .update(domainId, customer)
+          .mapError(Union2.Second.apply)
+      }
 
-  def deleteCustomer(customerId: CustomerId): ZIO[CustomerRepository, CustomerError.NotFound, Unit] =
+  def deleteCustomer(customerId: UUID): ZIO[CustomerRepository, CustomerError.NotFound, Unit] = {
     /*
-      TODO: after implementing orders ensure that client that is going to be deleted, doesn't have active orders
+      TODO: after implementing orders ensure that client that is going to be deleted, doesn't have any orders
      */
-    CustomerRepository.delete(customerId)
+    val domainId = CustomerId.fromUUID(customerId)
+    CustomerRepository.delete(domainId)
+  }
 }
