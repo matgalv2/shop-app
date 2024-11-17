@@ -8,7 +8,7 @@ import io.github.g4lowy.validation.validators.{ NotValidated, Validation, Valida
 final case class Order private (
   orderId: OrderId,
   customer: Customer,
-  status: OrderStatus,
+  orderStatus: OrderStatus,
   details: List[OrderDetail],
   paymentType: PaymentType,
   paymentAddress: Address,
