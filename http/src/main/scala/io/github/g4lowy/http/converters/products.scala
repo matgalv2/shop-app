@@ -2,7 +2,6 @@ package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{ CreateProduct, GetProduct, UpdateProduct }
 import io.github.g4lowy.product.domain.model.{ Description, Name, Price, Product, ProductId }
-import io.github.g4lowy.product.domain
 import io.scalaland.chimney.dsl._
 
 object products {
@@ -39,11 +38,11 @@ object products {
         .transform
   }
 
-  implicit class ProductIdOps(private val productId: domain.model.ProductId) extends AnyVal {
+  implicit class ProductIdOps(private val productId: ProductId) extends AnyVal {
     def toAPI: http.generated.definitions.ProductId =
       productId
         .into[http.generated.definitions.ProductId]
-        .withFieldRenamed(_.value, _.productId)
+        .withFieldRenamed(_.value, _.value)
         .transform
   }
 }
