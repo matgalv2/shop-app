@@ -114,12 +114,9 @@ paths:
 
 components:
   schemas:
-    OrderDetail:
+    GetOrderDetail:
       type: object
       properties:
-        orderId:
-          type: string
-          format: uuid
         productId:
           type: string
           format: uuid
@@ -130,12 +127,24 @@ components:
           type: number
           x-scala-type: scala.math.BigDecimal
       required:
-        - orderId
         - productId
         - quantity
         - pricePerUnit
 
-    Address:
+    CreateOrderDetail:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int32
+      required:
+        - productId
+        - quantity
+
+    GetAddress:
       type: object
       properties:
         addressId:
@@ -161,6 +170,28 @@ components:
         - zipCode
         - building
 
+    CreateAddress:
+      type: object
+      properties:
+        country:
+          type: string
+        city:
+          type: string
+        street:
+          type: string
+        zipCode:
+          type: string
+        building:
+          type: string
+        apartment:
+          type: string
+      required:
+        - country
+        - city
+        - street
+        - zipCode
+        - building
+
     GetOrder:
       type: object
       properties:
@@ -168,7 +199,8 @@ components:
           type: string
           format: uuid
         customerId:
-          $ref: '#/components/schemas/CustomerId'
+          type: string
+          format: uuid
         status:
           type: string
           enum:
@@ -178,58 +210,60 @@ components:
             - IN_PROGRESS
             - SENT
             - DELIVERED
-        products:
+        details:
           type: array
           items:
-            $ref: '#/components/schemas/OrderDetail'
+            $ref: '#/components/schemas/GetOrderDetail'
         totalCost:
           type: number
-          format: double
+          x-scala-type: scala.math.BigDecimal
         paymentType:
           type: string
           enum: [BANK_TRANSFER, CARD, ON_DELIVERY]
         paymentAddress:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/GetAddress'
         shipmentType:
           type: string
           enum: [COURIER, BOX, ON_PLACE]
         shipmentAddress:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/GetAddress'
       required:
         - orderId
         - customerId
         - status
+        - details
         - totalCost
         - paymentType
         - paymentAddress
         - shipmentType
-        - products
 
     CreateOrder:
       type: object
       properties:
         customerId:
-          $ref: '#/components/schemas/CustomerId'
-        productsIds:
+          type: string
+          format: uuid
+        details:
           type: array
           items:
-            $ref: '#/components/schemas/ProductId'
+            $ref: '#/components/schemas/CreateOrderDetail'
         paymentType:
           type: string
           enum: [ BANK_TRANSFER, CARD, ON_DELIVERY ]
         paymentAddress:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/CreateAddress'
         shipmentType:
           type: string
           enum: [ COURIER, BOX, ON_PLACE ]
         shipmentAddress:
-          $ref: '#/components/schemas/Address'
+          $ref: '#/components/schemas/CreateAddress'
       required:
         - customerId
         - productsIds
         - paymentType
         - paymentAddress
         - shipmentType
+        - details
 
     PatchOrder:
       type: object
@@ -246,32 +280,14 @@ components:
       required:
         - status
 
-    CustomerId:
-      type: object
-      properties:
-        customerId:
-          type: string
-          format: uuid
-      required:
-        - customerId
-
-    ProductId:
-      type: object
-      properties:
-        productId:
-          type: string
-          format: uuid
-      required:
-        - productId
-
     OrderId:
       type: object
       properties:
-        orderId:
+        value:
           type: string
           format: uuid
       required:
-        - orderId
+        - value
 
     ErrorResponse:
       type: object
