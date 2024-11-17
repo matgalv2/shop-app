@@ -178,11 +178,11 @@ components:
     ProductId:
       type: object
       properties:
-        productId:
+        value:
           type: string
           format: uuid
       required:
-        - productId
+        - value
 
     ErrorResponse:
       type: object

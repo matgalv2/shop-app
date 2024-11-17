@@ -194,11 +194,11 @@ components:
     CustomerId:
       type: object
       properties:
-        customerId:
+        value:
           type: string
           format: uuid
       required:
-        - customerId
+        - value
 
     ErrorResponse:
       type: object
