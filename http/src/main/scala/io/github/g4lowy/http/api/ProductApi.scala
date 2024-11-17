@@ -18,9 +18,8 @@ import io.github.g4lowy.product.domain.repository.ProductRepository
 import zio.{ RIO, Runtime, ZIO }
 import io.github.g4lowy.http.converters.products._
 import io.github.g4lowy.http.error._
-import io.github.g4lowy.product.domain.model.{ ProductError, ProductId }
+import io.github.g4lowy.product.domain.model.ProductId
 import io.github.g4lowy.validation.extras.ZIOValidationOps
-import io.github.g4lowy.validation.validators.Validator
 import org.http4s.HttpRoutes
 
 import java.util.UUID
@@ -30,22 +29,24 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
   override def createProduct(
     respond: CreateProductResponse.type
   )(body: CreateProduct): RIO[Environment, CreateProductResponse] =
-    ProductService
-      .createProduct(body)
-      .mapBoth(
-        error => respond.BadRequest(ErrorResponse.single(error.toMessage)),
-        productId => respond.Created(productId.toAPI)
-      )
+    ZIO
+      .fromNotValidated(body.toDomain)
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+      .flatMap(ProductService.createProduct)
+      .map(productId => respond.Created(productId.toAPI))
       .merge
 
   override def getAllProducts(respond: GetAllProductsResponse.type)(): RIO[Environment, GetAllProductsResponse] =
-    ProductService.getProducts.map(respond.Ok)
+    ProductService.getProducts
+      .map(_.map(_.toAPI))
+      .map(_.toVector)
+      .map(respond.Ok)
 
   override def getProductById(
     respond: GetProductByIdResponse.type
   )(productId: UUID): RIO[Environment, GetProductByIdResponse] =
     ProductService
-      .getProductById(productId)
+      .getProductById(ProductId.fromUUID(productId))
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _.toAPI)
       .map(respond.Ok)
       .merge
@@ -54,20 +55,21 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
     respond: DeleteProductResponse.type
   )(productId: UUID): RIO[Environment, DeleteProductResponse] =
     ProductService
-      .deleteProduct(productId)
+      .deleteProduct(ProductId.fromUUID(productId))
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _ => respond.NoContent)
       .merge
 
   override def updateProduct(
     respond: UpdateProductResponse.type
   )(productId: UUID, body: UpdateProduct): RIO[Environment, UpdateProductResponse] =
-    ProductService
-      .updateProduct(productId, body)
-      .mapError(_.map {
-        case error: Validator.FailureDescription =>
-          respond.BadRequest(ErrorResponse.single(error.toMessage))
-        case error: ProductError.NotFound => respond.NotFound(ErrorResponse.single(error.toMessage))
-      })
+    ZIO
+      .fromNotValidated(body.toDomain)
+      .mapError(error => respond.BadRequest(ErrorResponse.single(error.toMessage)))
+      .flatMap(product =>
+        ProductService
+          .updateProduct(ProductId.fromUUID(productId), product)
+          .mapError(error => respond.NotFound(ErrorResponse.single(error.toMessage)))
+      )
       .as(respond.NoContent)
       .merge
 }
