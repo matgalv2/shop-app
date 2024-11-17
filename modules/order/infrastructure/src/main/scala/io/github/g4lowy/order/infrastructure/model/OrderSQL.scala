@@ -48,7 +48,7 @@ object OrderSQL {
     OrderSQL(
       orderId           = order.orderId.value,
       customerId        = order.customer.customerId.value,
-      status            = OrderStatusSQL.fromDomain(order.status),
+      status            = OrderStatusSQL.fromDomain(order.orderStatus),
       paymentType       = PaymentTypeSQL.fromDomain(order.paymentType),
       paymentAddressId  = order.paymentAddress.addressId.value,
       shipmentType      = ShipmentTypeSQL.fromDomain(order.shipmentType),
