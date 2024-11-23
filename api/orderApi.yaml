@@ -81,7 +81,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     patch:
-      operationId: patchOrder
+      operationId: updateStatus
       x-jvm-package: orders
       parameters:
         - in: path
