@@ -139,7 +139,7 @@ components:
           type: string
         price:
           type: number
-          format: double
+          x-scala-type: scala.math.BigDecimal
         description:
           type: string
       required:
@@ -154,7 +154,7 @@ components:
           type: string
         price:
           type: number
-          format: double
+          x-scala-type: scala.math.BigDecimal
         description:
           type: string
       required:
@@ -168,7 +168,7 @@ components:
           type: string
         price:
           type: number
-          format: double
+          x-scala-type: scala.math.BigDecimal
         description:
           type: string
       required:
