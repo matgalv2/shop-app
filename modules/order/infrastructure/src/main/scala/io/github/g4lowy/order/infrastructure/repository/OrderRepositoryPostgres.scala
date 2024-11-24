@@ -3,20 +3,15 @@ package io.github.g4lowy.order.infrastructure.repository
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
-import io.github.g4lowy.order.domain.model.{ Order, OrderError, OrderId, OrderStatus }
+import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderStatus}
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.order.infrastructure.model.{
-  AddressSQL,
-  OrderDetailSQL,
-  OrderSQL,
-  OrderStatusSQL,
-  PaymentTypeSQL,
-  ShipmentTypeSQL
-}
+import io.github.g4lowy.order.infrastructure.model._
+import io.github.g4lowy.product.domain.model.{ProductError, ProductId}
+import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import org.postgresql.util.PGobject
-import zio.{ IO, UIO,  URLayer, ZIO, ZLayer }
+import zio.{IO, UIO, URLayer, ZIO, ZLayer}
 
-import java.sql.{ SQLException, Types }
+import java.sql.{SQLException, Types}
 import java.util.UUID
 
 case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends OrderRepository {
@@ -42,6 +37,10 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
 
   private val customers = quote {
     querySchema[CustomerSQL]("Customers")
+  }
+
+  private val products = quote {
+    querySchema[ProductSQL]("Products")
   }
 
   private implicit val orderStatusEncoder: Encoder[OrderStatusSQL] = encoder[OrderStatusSQL](
@@ -89,38 +88,56 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       ShipmentTypeSQL.decode(row.getString(index))
   }
 
-  override def create(order: Order): UIO[OrderId] = {
+  override def create(order: Order): IO[ProductError.NotFound, OrderId] = {
 
     val insertPaymentAddress =
       run {
         quote {
           addresses.insertValue(lift(AddressSQL.fromDomain(order.paymentAddress)))
         }
-      }
+      }.orDie
 
-    val insertShipmentAddress = ZIO.whenCase(order.shipmentAddress)({ case Some(shipmentAddress) =>
-      run {
-        quote {
-          addresses.insertValue(lift(AddressSQL.fromDomain(shipmentAddress)))
+    val insertShipmentAddress = ZIO
+      .whenCase(order.shipmentAddress)({ case Some(shipmentAddress) =>
+        run {
+          quote {
+            addresses.insertValue(lift(AddressSQL.fromDomain(shipmentAddress)))
+          }
         }
-      }
-    })
+      })
+      .orDie
 
-    val insertOrderProducts =
-      ZIO.foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
-        run(quote(ordersDetails.insertValue(lift(orderProductSQL))))
-      )
+    val insertOrderDetails = {
+      implicit val uuidEncoding: MappedEncoding[UUID, String] = MappedEncoding(_.toString)
+
+      val details = order.details.map(_.productId.value)
+      run(quote(products.filter(product => lift(details).contains(product.productId)))).orDie.flatMap { foundProducts =>
+        if (foundProducts.size == order.details.size)
+          ZIO.foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
+            run(quote(ordersDetails.insertValue(lift(orderProductSQL)))).orDie
+          )
+        else
+          ZIO.fail {
+            val foundProductsIds = foundProducts.map(productSQL => ProductId.fromUUID(productSQL.productId))
+            ProductError.NotFound(order.details.map(_.productId).diff(foundProductsIds): _*)
+          }
+      }
+    }
 
     val insertOrder =
       run {
         quote {
           orders.insertValue(lift(OrderSQL.fromDomain(order)))
         }
-      }
+      }.orDie
 
-    transaction(insertPaymentAddress *> insertShipmentAddress *> insertOrderProducts *> insertOrder)
-      .as(order.orderId)
-      .orDie
+    transaction {
+      (insertPaymentAddress *> insertShipmentAddress *> insertOrderDetails *> insertOrder).either
+    }.orDie.flatMap {
+      case Left(error) => ZIO.fail(error)
+      case Right(_)    => ZIO.succeed(order.orderId)
+    }
+
   }
 
   override def getAll(offset: Int, limit: Int): UIO[List[Order]] =
