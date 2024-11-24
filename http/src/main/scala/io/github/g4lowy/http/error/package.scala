@@ -1,9 +1,9 @@
 package io.github.g4lowy.http
 
 import io.github.g4lowy.customer.domain.model.CustomerError
-import io.github.g4lowy.product.domain.model.ProductError
 import io.github.g4lowy.error.ErrorMessage
 import io.github.g4lowy.order.domain.model.OrderError
+import io.github.g4lowy.product.domain.model.ProductError
 import io.github.g4lowy.validation.validators.Validator
 
 package object error {
@@ -15,8 +15,11 @@ package object error {
     s"Client with id: $clientId was not found"
   }
 
-  implicit val productErrorNotFound: ErrorMessage[ProductError.NotFound] = { case ProductError.NotFound(productId) =>
-    s"Product with id: $productId was not found"
+  implicit val productErrorNotFound: ErrorMessage[ProductError.NotFound] = {
+    case ProductError.NotFound(productId) =>
+      s"Product with id: $productId was not found"
+    case ProductError.NotFound(productId, productIds @ _*) =>
+      s"Products with ids: [$productId, ${productIds.mkString(",")}] were not found"
   }
 
   implicit val orderError: ErrorMessage[OrderError] = {
