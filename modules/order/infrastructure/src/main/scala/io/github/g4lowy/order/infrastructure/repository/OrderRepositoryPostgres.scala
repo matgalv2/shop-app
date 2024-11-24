@@ -108,18 +108,17 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       .orDie
 
     val insertOrderDetails = {
-      implicit val uuidEncoding: MappedEncoding[UUID, String] = MappedEncoding(_.toString)
-
       val details = order.details.map(_.productId.value)
-      run(quote(products.filter(product => lift(details).contains(product.productId)))).orDie.flatMap { foundProducts =>
-        if (foundProducts.size == order.details.size)
-          ZIO.foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
-            run(quote(ordersDetails.insertValue(lift(orderProductSQL)))).orDie
-          )
-        else
-          ZIO.fail {
-            val foundProductsIds = foundProducts.map(productSQL => ProductId.fromUUID(productSQL.productId))
-            ProductError.NotFound(order.details.map(_.productId).diff(foundProductsIds): _*)
+      run(quote(products.filter(product => liftQuery(details).contains(product.productId)))).orDie.flatMap {
+        foundProducts =>
+          val productIdsFromOrder = order.details.map(_.productId)
+          val foundProductIds     = foundProducts.map(_.productId).map(ProductId.fromUUID)
+          productIdsFromOrder.diff(foundProductIds) match {
+            case head :: tail => ZIO.fail(ProductError.NotFound(head, tail: _*))
+            case Nil =>
+              ZIO.foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
+                run(quote(ordersDetails.insertValue(lift(orderProductSQL)))).orDie
+              )
           }
       }
     }
@@ -132,7 +131,7 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       }.orDie
 
     transaction {
-      (insertPaymentAddress *> insertShipmentAddress *> insertOrderDetails *> insertOrder).either
+      (insertPaymentAddress *> insertShipmentAddress *> insertOrder *> insertOrderDetails).either
     }.orDie.flatMap {
       case Left(error) => ZIO.fail(error)
       case Right(_)    => ZIO.succeed(order.orderId)
