@@ -1,21 +1,12 @@
 package io.github.g4lowy.http.converters
 
-import http.generated.definitions.{
-  CreateAddress,
-  CreateOrder,
-  CreateOrderDetail,
-  GetAddress,
-  GetOrder,
-  GetOrderDetail,
-  PatchOrder
-}
+import http.generated.definitions.{CreateAddress, CreateOrder, CreateOrderDetail, GetAddress, GetOrder, GetOrderDetail, PatchOrder}
 import io.github.g4lowy.customer.domain.model.Customer
 import io.github.g4lowy.http.dto.OrderDto
-import io.github.g4lowy.http.dto.OrderDto.{ AddressDto, OrderDetailDto, PaymentTypeDto, ShipmentTypeDto }
+import io.github.g4lowy.http.dto.OrderDto.{AddressDto, OrderDetailDto, PaymentTypeDto, ShipmentTypeDto}
 import io.github.g4lowy.order.domain.model.Address._
 import io.github.g4lowy.order.domain.model._
-import io.github.g4lowy.product.domain.model.Product
-import io.github.g4lowy.product.domain.model.ProductId
+import io.github.g4lowy.product.domain.model.{Product, ProductId}
 import io.scalaland.chimney.dsl._
 
 object orders {
@@ -123,10 +114,14 @@ object orders {
   }
 
   implicit class OrderDtoOps(private val orderDto: OrderDto) extends AnyVal {
-    def toDomain(customer: Customer, details: List[OrderDetail.Unvalidated]): Order.Unvalidated =
+    def toDomain(
+      orderId: OrderId.Unvalidated,
+      customer: Customer,
+      details: List[OrderDetail.Unvalidated]
+    ): Order.Unvalidated =
       orderDto
         .into[Order.Unvalidated]
-        .withFieldConst(_.orderId, OrderId.generate)
+        .withFieldConst(_.orderId, orderId)
         .withFieldConst(_.customer, customer)
         .withFieldConst(_.details, details)
         .withFieldConst(_.orderStatus, OrderStatus.Created)
