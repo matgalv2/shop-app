@@ -25,7 +25,7 @@ final case class OrderSQL(
   ): Order.Unvalidated =
     Order.Unvalidated(
       orderId         = OrderId.Unvalidated(orderId.toString),
-      customer        = customer.toUnvalidated,
+      customer        = customer.toDomain,
       orderStatus     = status.toDomain,
       paymentType     = paymentType.toDomain,
       paymentAddress  = paymentAddress.toUnvalidated,
