@@ -107,6 +107,15 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       })
       .orDie
 
+    val insertOrder = {
+      val orderSQL = OrderSQL.fromDomain(order)
+      run {
+        quote {
+          orders.insertValue(lift(orderSQL))
+        }
+      }.orDie
+    }
+
     val insertOrderDetails = {
       val details = order.details.map(_.productId.value)
       run(quote(products.filter(product => liftQuery(details).contains(product.productId)))).orDie.flatMap {
@@ -122,13 +131,6 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
           }
       }
     }
-
-    val insertOrder =
-      run {
-        quote {
-          orders.insertValue(lift(OrderSQL.fromDomain(order)))
-        }
-      }.orDie
 
     transaction {
       (insertPaymentAddress *> insertShipmentAddress *> insertOrder *> insertOrderDetails).either
