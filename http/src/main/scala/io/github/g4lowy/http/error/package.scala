@@ -12,7 +12,7 @@ package object error {
     s"Validation failure description: $description"
 
   implicit val customerErrorNotFound: ErrorMessage[CustomerError.NotFound] = { case CustomerError.NotFound(clientId) =>
-    s"Client with id: $clientId was not found"
+    s"Customer with id: $clientId was not found"
   }
 
   implicit val productErrorNotFound: ErrorMessage[ProductError.NotFound] = {
@@ -28,7 +28,7 @@ package object error {
   }
 
   implicit val orderErrorNotFound: ErrorMessage[OrderError.NotFound] = { case OrderError.NotFound(orderId) =>
-    s"Order with id: $orderId was not found"
+    s"Order with id: ${orderId.value} was not found"
   }
 
   implicit val orderErrorInvalidStatus: ErrorMessage[OrderError.InvalidStatus] = {
