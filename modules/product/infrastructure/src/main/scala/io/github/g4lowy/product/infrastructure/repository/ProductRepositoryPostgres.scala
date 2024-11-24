@@ -3,10 +3,10 @@ package io.github.g4lowy.product.infrastructure.repository
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.product.domain.model
-import io.github.g4lowy.product.domain.model.{ ProductError, ProductId }
+import io.github.g4lowy.product.domain.model.{ProductError, ProductId}
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
-import zio.{ IO, UIO, URLayer, ZIO, ZLayer }
+import zio.{IO, UIO, URLayer, ZIO, ZLayer}
 
 case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends ProductRepository {
 
