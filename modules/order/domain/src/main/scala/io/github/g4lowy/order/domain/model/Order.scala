@@ -1,6 +1,6 @@
 package io.github.g4lowy.order.domain.model
 
-import io.github.g4lowy.customer.domain.model.{ Customer, CustomerId }
+import io.github.g4lowy.customer.domain.model.Customer
 import io.github.g4lowy.order.domain.model
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.{ NotValidated, Validation, Validator }
@@ -22,7 +22,7 @@ final case class Order private (
 object Order {
   final case class Unvalidated(
     orderId: OrderId.Unvalidated,
-    customer: Customer.Unvalidated,
+    customer: Customer,
     details: List[OrderDetail.Unvalidated],
     paymentType: PaymentType,
     paymentAddress: Address.Unvalidated,
@@ -32,8 +32,7 @@ object Order {
   ) extends NotValidated[Order] {
     override def validate: Validation[FailureDescription, Order] =
       for {
-        orderId         <- orderId.validate
-        customer        <- customer.validate
+        orderId <- orderId.validate
         details         <- Validator.validateIterable[OrderDetail, model.OrderDetail.Unvalidated](details)
         paymentAddress  <- paymentAddress.validate
         shipmentAddress <- Validator.validOrCheck[Address, Address.Unvalidated](shipmentAddress)
@@ -51,7 +50,7 @@ object Order {
     override def unsafeValidation: Order =
       Order(
         orderId.unsafeValidation,
-        customer.unsafeValidation,
+        customer,
         orderStatus,
         details.map(_.unsafeValidation),
         paymentType,
