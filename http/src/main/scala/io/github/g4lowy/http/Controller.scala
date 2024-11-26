@@ -1,11 +1,12 @@
 package io.github.g4lowy.http
 
-import io.github.g4lowy.http.api.{ CustomerApi, OrderApi, ProductApi }
+import io.github.g4lowy.http.api.{CustomerApi, OrderApi, ProductApi}
+import io.github.g4lowy.http.middleware.DefectHandlingMiddleware
+import org.http4s.HttpRoutes
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.Server
-import org.http4s.HttpRoutes
-import zio.{ &, RIO, ZIO }
 import zio.interop.catz._
+import zio.{&, RIO, ZIO}
 
 object Controller {
 
@@ -19,8 +20,9 @@ object Controller {
       customersRoutes <- CustomerApi.routes
       productsRoutes  <- ProductApi.routes
       ordersRoutes    <- OrderApi.routes
-      combinedRoutes = combineRoutes(customersRoutes, productsRoutes, ordersRoutes)
-    } yield combinedRoutes.orNotFound
+      combinedRoutes       = combineRoutes(customersRoutes, productsRoutes, ordersRoutes)
+      routesWithMiddleware = DefectHandlingMiddleware.recoverDefectLogged(combinedRoutes).orNotFound
+    } yield routesWithMiddleware
 
   val httpServer: ZIO[AppEnvironment & HttpServer, Throwable, Server[RIO[AppEnvironment, *]]] =
     for {
