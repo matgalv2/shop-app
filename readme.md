@@ -9,7 +9,7 @@ Simple CRUD REST-based application for managing online store. Database consists 
 
 |                   | Customers | Products | Orders |
 |-------------------|-----------|----------|--------|
-| Implementation    | ✅         | ✅        | ❌      |
+| Implementation    | ✅         | ✅        | ✅      |
 | Unit Tests        | ✅         | ✅        | ❌      |
 | Integration Tests | ✅         | ✅        | ❌      |
 | Acceptance Tests  | ✅         | ✅        | ❌      |
