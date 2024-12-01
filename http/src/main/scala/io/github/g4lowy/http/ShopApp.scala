@@ -36,7 +36,5 @@ object ShopApp extends ZIOAppDefault {
     2. add createdAt field to order
     3. implement pagination for all entities
     4. if mapping requires logic map api to dto and use dto in service
-    5. move mapping dto <-> domain to services
-
    */
 }
