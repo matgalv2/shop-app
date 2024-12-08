@@ -1,6 +1,6 @@
 package io.github.g4lowy.validation.validators
 
-import io.github.g4lowy.validation.validators.Validation.{ Invalid, Valid }
+import io.github.g4lowy.validation.validators.Validation.{Invalid, Valid}
 
 import java.sql.Date
 import java.util.UUID
@@ -88,6 +88,9 @@ object Validator {
 
   def min(value: BigDecimal): Validator[BigDecimal] =
     new Validator(_ >= value, s"value needs to be greater than or equal to $value")
+
+  def greaterThan(value: BigDecimal): Validator[BigDecimal] =
+    new Validator(_ > value, s"value needs to be greater than $value")
 
   def max(value: BigDecimal): Validator[BigDecimal] =
     new Validator(_ <= value, s"value needs to be lesser than or equal to $value")

@@ -1,8 +1,9 @@
 package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{CreateCustomer, UpdateCustomer}
-import io.github.g4lowy.customer.domain.model.{Customer, CustomerId, FirstName, LastName, Phone}
+import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.http.converters.customers._
+import io.github.g4lowy.test.utils.validation.ValidationOps
 import zio.Scope
 import zio.test._
 
@@ -19,7 +20,9 @@ object CustomerMappersSpec extends ZIOSpecDefault {
           domainCustomer.firstName.value.equals(createCustomer.firstName),
           domainCustomer.lastName.value.equals(createCustomer.lastName),
           domainCustomer.phone.value.equals(createCustomer.phone),
-          domainCustomer.birthDate.exists(x => x.toLocalDate.equals(createCustomer.birthDate.getOrElse(LocalDate.now())))
+          domainCustomer.birthDate.exists(x =>
+            x.toLocalDate.equals(createCustomer.birthDate.getOrElse(LocalDate.now()))
+          )
         )
       },
       test("correctly transform UpdateCustomer to Customer") {
@@ -29,7 +32,9 @@ object CustomerMappersSpec extends ZIOSpecDefault {
           domainCustomer.firstName.value.equals(updateCustomer.firstName),
           domainCustomer.lastName.value.equals(updateCustomer.lastName),
           domainCustomer.phone.value.equals(updateCustomer.phone),
-          domainCustomer.birthDate.exists(x => x.toLocalDate.equals(updateCustomer.birthDate.getOrElse(LocalDate.now())))
+          domainCustomer.birthDate.exists(x =>
+            x.toLocalDate.equals(updateCustomer.birthDate.getOrElse(LocalDate.now()))
+          )
         )
       },
       test("correctly transform Customer to GetCustomer") {
@@ -43,7 +48,8 @@ object CustomerMappersSpec extends ZIOSpecDefault {
               Phone.Unvalidated("+48-123456"),
               LocalDateTime.now()
             )
-            .unsafeValidation
+            .validate
+            .asValid
         val apiCustomer = domainCustomer.toAPI
         assertTrue(
           apiCustomer.firstName.equals(domainCustomer.firstName.value),
@@ -55,9 +61,9 @@ object CustomerMappersSpec extends ZIOSpecDefault {
         )
       },
       test("correctly transform domain CustomerId to api CustomerId") {
-        val domainId = CustomerId.generate.unsafeValidation
+        val domainId = CustomerId.generate
         val apiId    = domainId.toAPI
-        assertTrue(domainId.value.equals(apiId.customerId))
+        assertTrue(domainId.value.equals(apiId.value))
       }
     )
 }

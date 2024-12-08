@@ -1,15 +1,15 @@
 package io.github.g4lowy.http.acceptance
-import io.circe.{ Json, JsonObject }
+import io.circe.{Json, JsonObject}
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import org.http4s.implicits.http4sLiteralsSyntax
-import org.http4s.circe._
-import io.getquill.mirrorContextWithQueryProbing.{ querySchema, quote }
+import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
-import org.http4s.{ HttpRoutes, Method, Request, Status, Uri }
-import zio.{ RIO, URIO, ZIO }
+import org.http4s.circe._
+import org.http4s.implicits.http4sLiteralsSyntax
+import org.http4s._
+import zio.{RIO, URIO, ZIO}
 
 class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
@@ -57,7 +57,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       Then("the response should be 204 Created")
       response.status shouldBe Status.Created
-      body.asObject.exists(_.contains("productId")) shouldBe true
+      body.asObject.exists(_.contains("value")) shouldBe true
 
     }
 
@@ -93,7 +93,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("productId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -141,7 +141,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("productId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -185,7 +185,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("productId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -224,7 +224,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("productId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 

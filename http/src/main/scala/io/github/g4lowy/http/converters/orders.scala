@@ -1,12 +1,12 @@
 package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{CreateAddress, CreateOrder, CreateOrderDetail, GetAddress, GetOrder, GetOrderDetail, PatchOrder}
-import io.github.g4lowy.customer.domain.model.Customer
+import io.github.g4lowy.abstractType.Id.UUIDOps
 import io.github.g4lowy.http.dto.OrderDto
 import io.github.g4lowy.http.dto.OrderDto.{AddressDto, OrderDetailDto, PaymentTypeDto, ShipmentTypeDto}
-import io.github.g4lowy.order.domain.model.Address._
 import io.github.g4lowy.order.domain.model._
-import io.github.g4lowy.product.domain.model.{Product, ProductId}
+import io.github.g4lowy.order.domain.model.address._
+import io.github.g4lowy.product.domain.model.Product
 import io.scalaland.chimney.dsl._
 
 object orders {
@@ -102,11 +102,11 @@ object orders {
   }
 
   implicit class OrderDetailDtoOps(private val orderDetailDto: OrderDetailDto) extends AnyVal {
-    def toDomain(orderId: OrderId.Unvalidated, product: Product): OrderDetail.Unvalidated =
+    def toDomain(orderId: OrderId, product: Product): OrderDetail.Unvalidated =
       orderDetailDto
         .into[OrderDetail.Unvalidated]
         .withFieldConst(_.orderId, orderId)
-        .withFieldComputed(_.productId, x => ProductId.Unvalidated(x.productId.toString))
+        .withFieldComputed(_.productId, _.productId.toId)
         .withFieldComputed(_.quantity, _.quantity)
         .withFieldConst(_.pricePerUnit, product.price.value)
         .transform
@@ -114,15 +114,11 @@ object orders {
   }
 
   implicit class OrderDtoOps(private val orderDto: OrderDto) extends AnyVal {
-    def toDomain(
-      orderId: OrderId.Unvalidated,
-      customer: Customer,
-      details: List[OrderDetail.Unvalidated]
-    ): Order.Unvalidated =
+    def toDomain(orderId: OrderId, details: List[OrderDetail.Unvalidated]): Order.Unvalidated =
       orderDto
         .into[Order.Unvalidated]
         .withFieldConst(_.orderId, orderId)
-        .withFieldConst(_.customer, customer)
+        .withFieldComputed(_.customerId, _.customerId.toId)
         .withFieldConst(_.details, details)
         .withFieldConst(_.orderStatus, OrderStatus.Created)
         .withFieldComputed(_.paymentType, _.paymentType.toDomain)
@@ -191,7 +187,7 @@ object orders {
       order
         .into[GetOrder]
         .withFieldComputed(_.orderId, _.orderId.value)
-        .withFieldComputed(_.customerId, _.customer.customerId.value)
+        .withFieldComputed(_.customerId, _.customerId.value)
         .withFieldComputed(_.status, _.orderStatus.toAPI)
         .withFieldComputed(_.details, _.details.map(_.toAPI).toVector)
         .withFieldComputed(_.totalCost, _.totalCost)

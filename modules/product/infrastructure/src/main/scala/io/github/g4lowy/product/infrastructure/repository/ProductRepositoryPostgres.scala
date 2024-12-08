@@ -2,11 +2,15 @@ package io.github.g4lowy.product.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
+import io.github.g4lowy.abstractType.Id
+import io.github.g4lowy.abstractType.Id.UUIDOps
 import io.github.g4lowy.product.domain.model
-import io.github.g4lowy.product.domain.model.{ProductError, ProductId}
+import io.github.g4lowy.product.domain.model.{Product, ProductError, ProductId}
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import zio.{IO, UIO, URLayer, ZIO, ZLayer}
+
+import java.sql.SQLException
 
 case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends ProductRepository {
 
@@ -23,11 +27,11 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
           products.filter(_.productId == lift(productId.value))
         }
       }
-    result
-      .orDieWith(error => error)
+
+    result.orDie
       .flatMap(_.headOption match {
-        case Some(value) => ZIO.succeed(value.toDomain)
-        case None        => ZIO.fail(ProductError.NotFound(productId))
+        case Some(value) => ZIO.succeed(value.toDomain.validateUnsafe)
+        case None        => ZIO.fail(ProductError.NotFound(productId, Nil))
       })
   }
 
@@ -35,8 +39,8 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
     val result = run(quote(products))
 
     result
-      .map(_.map(_.toDomain))
-      .orDieWith(error => error)
+      .map(_.map(_.toDomain.validateUnsafe))
+      .orDie
   }
 
   override def create(product: model.Product): UIO[ProductId] = {
@@ -65,9 +69,8 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
       }
     }
 
-    result
-      .orDieWith(error => error)
-      .flatMap(rowsNo => ZIO.unless(rowsNo == 1)(ZIO.fail(ProductError.NotFound(productId))))
+    result.orDie
+      .flatMap(rowsNo => ZIO.unless(rowsNo == 1)(ZIO.fail(ProductError.NotFound(productId, Nil))))
       .unit
   }
 
@@ -80,10 +83,26 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
       }
     }
 
-    result
-      .orDieWith(error => error)
-      .flatMap(rowsNo => ZIO.fail(ProductError.NotFound(productId)).unless(rowsNo == 1))
+    result.orDie
+      .flatMap(rowsNo => ZIO.fail(ProductError.NotFound(productId, Nil)).unless(rowsNo == 1))
       .unit
+  }
+
+  override def getMany(productIds: List[Id]): IO[ProductError.NotFound, List[Product]] = {
+    val ids = productIds.map(_.value)
+    val result: ZIO[Any, SQLException, List[ProductSQL]] = run {
+      quote {
+        products
+          .filter(product => liftQuery(ids).contains(product.productId))
+      }
+    }
+    result.orDie.flatMap { foundProducts =>
+      val foundIds = foundProducts.map(_.productId.toId)
+      productIds.diff(foundIds) match {
+        case Nil          => ZIO.succeed(foundProducts.map(_.toDomain.validateUnsafe))
+        case head :: tail => ZIO.fail(ProductError.NotFound(head, tail))
+      }
+    }
   }
 }
 object ProductRepositoryPostgres {

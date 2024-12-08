@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.model
 
 import io.github.g4lowy.order.domain.model.ShipmentType
-import io.github.g4lowy.test.utils.enums.{ EnumDecoder, EnumSQL }
+import io.github.g4lowy.test.utils.enums.{EnumDecoder, EnumSQL}
 
 sealed abstract class ShipmentTypeSQL(val value: String) extends EnumSQL {
   def toDomain: ShipmentType = this match {
@@ -23,5 +23,4 @@ object ShipmentTypeSQL extends EnumDecoder[ShipmentTypeSQL] {
     case ShipmentType.Box     => ShipmentTypeSQL.Box
     case ShipmentType.OnPlace => ShipmentTypeSQL.OnPlace
   }
-
 }

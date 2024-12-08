@@ -2,10 +2,10 @@ package io.github.g4lowy.customer.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.github.g4lowy.customer.domain.model.{ Customer, CustomerError, CustomerId }
+import io.github.g4lowy.customer.domain.model.{Customer, CustomerError, CustomerId}
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
-import zio.{ IO, UIO, URLayer, ZIO, ZLayer }
+import zio.{IO, UIO, URLayer, ZIO, ZLayer}
 
 case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends CustomerRepository {
 
@@ -38,7 +38,7 @@ case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends 
     result
       .orDieWith(error => error)
       .flatMap(_.headOption match {
-        case Some(value) => ZIO.succeed(value.toDomain)
+        case Some(value) => ZIO.succeed(value.toDomain.validateUnsafe)
         case None        => ZIO.fail(CustomerError.NotFound(clientId))
       })
   }
@@ -47,7 +47,7 @@ case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends 
     val result = run(quote(customers))
 
     result
-      .map(_.map(_.toDomain))
+      .map(_.map(_.toDomain.validateUnsafe))
       .orDieWith(error => error)
   }
 

@@ -2,18 +2,18 @@ package io.github.g4lowy.product.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.getquill.mirrorContextWithQueryProbing.{ querySchema, quote }
+import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
 import io.github.g4lowy.product.domain.model._
-import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import io.github.g4lowy.product.domain.repository.ProductRepository
+import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import io.github.g4lowy.test.utils.AppTestConfig
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ dataSourceLive, postgresLive }
+import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
-import io.github.g4lowy.validation.validators.{ Validation, Validator }
+import io.github.g4lowy.validation.validators.{Validation, Validator}
 import zio.test.TestAspect.sequential
 import zio.test._
-import zio.{ Chunk, Scope, ZIO }
+import zio.{Chunk, Scope, ZIO}
 
 import java.util.UUID
 
@@ -51,7 +51,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
           } yield assertTrue(
             beforeAdd == 0,
             afterAdd.size == 1,
-            afterAdd.head.productId.value.toString == product.productId.value
+            afterAdd.head.productId.value == product.productId.value
           )
 
         },
@@ -71,7 +71,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
         },
         test("fail when id is not found") {
           for {
-            newId         <- ZIO.fromNotValidated(ProductId.Unvalidated(UUID.randomUUID().toString))
+            newId         <- ZIO.succeed(ProductId.generate)
             fetchedClient <- ProductRepository.getById(newId).exit
           } yield assertTrue(fetchedClient.isFailure)
         },
@@ -109,7 +109,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
         },
         test("fail when id is not found") {
           for {
-            newId  <- ZIO.fromNotValidated(ProductId.Unvalidated(UUID.randomUUID().toString))
+            newId  <- ZIO.succeed(ProductId.generate)
             result <- ProductRepository.delete(newId).exit
           } yield assertTrue(result.isFailure)
         }
@@ -136,7 +136,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
     description: Option[String] = None
   ): Product.Unvalidated =
     Product.Unvalidated(
-      ProductId.Unvalidated(id),
+      ProductId(UUID.fromString(id)),
       Name.Unvalidated(name),
       Price.Unvalidated(price),
       description.map(Description.Unvalidated.apply)

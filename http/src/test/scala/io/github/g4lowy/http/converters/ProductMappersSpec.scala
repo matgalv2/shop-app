@@ -1,10 +1,11 @@
 package io.github.g4lowy.http.converters
 
-import http.generated.definitions.{ CreateProduct, UpdateProduct }
+import http.generated.definitions.{CreateProduct, UpdateProduct}
 import io.github.g4lowy.http.converters.products._
-import io.github.g4lowy.product.domain.model.{ Description, Name, Price, Product, ProductId }
+import io.github.g4lowy.product.domain.model._
+import io.github.g4lowy.test.utils.validation.ValidationOps
 import zio.Scope
-import zio.test.{ assertTrue, Spec, TestEnvironment, ZIOSpecDefault }
+import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assertTrue}
 
 object ProductMappersSpec extends ZIOSpecDefault {
   def spec: Spec[TestEnvironment with Scope, Any] =
@@ -40,7 +41,8 @@ object ProductMappersSpec extends ZIOSpecDefault {
               Price.Unvalidated(3.59),
               Some(Description.Unvalidated("description"))
             )
-            .unsafeValidation
+            .validate
+            .asValid
         val apiProduct = domainProduct.toAPI
         assertTrue(
           apiProduct.name.equals(domainProduct.name.value),
@@ -51,9 +53,9 @@ object ProductMappersSpec extends ZIOSpecDefault {
         )
       },
       test("correctly transform domain ProductId to api ProductId") {
-        val domainId = ProductId.generate.unsafeValidation
+        val domainId = ProductId.generate
         val apiId    = domainId.toAPI
-        assertTrue(domainId.value.equals(apiId.productId))
+        assertTrue(domainId.value.equals(apiId.value))
       }
     )
 }

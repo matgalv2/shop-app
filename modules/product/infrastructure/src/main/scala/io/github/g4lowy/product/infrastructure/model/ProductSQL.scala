@@ -1,22 +1,20 @@
 package io.github.g4lowy.product.infrastructure.model
 
-import io.github.g4lowy.product.domain.model.{ Description, Name, Price, Product, ProductId }
+import io.github.g4lowy.product.domain.model._
 
 import java.util.UUID
 
 case class ProductSQL(productId: UUID, name: String, price: BigDecimal, description: Option[String]) {
-  def toUnvalidated: Product.Unvalidated =
+  def toDomain: Product.Unvalidated =
     Product
       .Unvalidated(
-        productId   = ProductId.Unvalidated(productId.toString),
+        productId   = ProductId.fromUUID(productId),
         name        = Name.Unvalidated(name),
         price       = Price.Unvalidated(price),
         description = description.map(Description.Unvalidated.apply)
       )
-
-  def toDomain: Product =
-    toUnvalidated.unsafeValidation
 }
+
 object ProductSQL {
   def fromDomain(product: Product): ProductSQL =
     ProductSQL(

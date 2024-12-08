@@ -1,8 +1,7 @@
 package io.github.g4lowy.customer.domain.model
 
-import io.github.g4lowy.validation.validators.{ NotValidated, Validation }
-import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.Validator._
+import io.github.g4lowy.validation.validators.{NotValidated, Validation}
 
 final case class FirstName private (value: String)
 
@@ -11,6 +10,8 @@ object FirstName {
     override def validate: Validation[FailureDescription, FirstName] =
       (nonEmpty and nonBlank and capitalized).apply(value).map(FirstName.apply)
 
-    override def unsafeValidation: FirstName = FirstName.apply(value)
+    override protected def unsafeValidation: FirstName = FirstName.apply(value)
+
+    private[customer] def validateUnsafe: FirstName = unsafeValidation
   }
 }

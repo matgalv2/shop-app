@@ -1,23 +1,15 @@
 package io.github.g4lowy.product.domain.model
 
-import io.github.g4lowy.validation.validators.{ NotValidated, Validation }
-import io.github.g4lowy.validation.validators.Validator._
+import io.github.g4lowy.abstractType.Id
 
 import java.util.UUID
 
-final case class ProductId private (value: UUID)
+final case class ProductId(value: UUID) extends Id
 
 object ProductId {
 
-  def generate: ProductId.Unvalidated = ProductId.Unvalidated(UUID.randomUUID.toString)
+  def generate: ProductId = ProductId(UUID.randomUUID)
 
-  def fromUUID(uuid: UUID) = ProductId(uuid)
+  def fromUUID(uuid: UUID): ProductId = ProductId(uuid)
 
-  final case class Unvalidated(value: String) extends NotValidated[ProductId] {
-
-    override def validate: Validation[FailureDescription, ProductId] =
-      uuid.apply(value).map(uuid => ProductId.apply(UUID.fromString(uuid)))
-
-    override def unsafeValidation: ProductId = ProductId(UUID.fromString(value))
-  }
 }

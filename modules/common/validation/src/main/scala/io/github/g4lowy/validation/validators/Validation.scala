@@ -1,6 +1,6 @@
 package io.github.g4lowy.validation.validators
 
-import io.github.g4lowy.validation.validators.Validation.{ Invalid, Valid }
+import io.github.g4lowy.validation.validators.Validation.{Invalid, Valid}
 
 sealed trait Validation[+E, +A] { self =>
 
@@ -28,6 +28,11 @@ sealed trait Validation[+E, +A] { self =>
     case Invalid(error) => Left(error)
   }
 
+  def exists(p: A => Boolean): Boolean =
+    self match {
+      case Valid(value) => p(value)
+      case Invalid(_)   => false
+    }
 }
 
 object Validation {

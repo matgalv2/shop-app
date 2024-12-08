@@ -1,21 +1,15 @@
 package io.github.g4lowy.order.domain.model
 
-import io.github.g4lowy.validation.validators.{ NotValidated, Validation }
-import io.github.g4lowy.validation.validators.Validator.{ uuid, FailureDescription }
+import io.github.g4lowy.abstractType.Id
 
 import java.util.UUID
 
-final case class OrderId private (value: UUID)
+final case class OrderId(value: UUID) extends Id
 
 object OrderId {
-  def generate: OrderId.Unvalidated = OrderId.Unvalidated(UUID.randomUUID.toString)
 
-  def fromUUID(uuid: UUID) = OrderId(uuid)
+  def generate: OrderId = OrderId(UUID.randomUUID)
 
-  final case class Unvalidated(value: String) extends NotValidated[OrderId] {
-    def validate: Validation[FailureDescription, OrderId] =
-      uuid.apply(value).map(uuid => OrderId.apply(UUID.fromString(uuid)))
+  def fromUUID(uuid: UUID): OrderId = OrderId(uuid)
 
-    def unsafeValidation: OrderId = OrderId(UUID.fromString(value))
-  }
 }

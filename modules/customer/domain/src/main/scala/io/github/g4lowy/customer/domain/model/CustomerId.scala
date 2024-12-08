@@ -1,21 +1,15 @@
 package io.github.g4lowy.customer.domain.model
 
-import io.github.g4lowy.validation.validators.{ NotValidated, Validation }
-import io.github.g4lowy.validation.validators.Validator._
+
+
+import io.github.g4lowy.abstractType.Id
 
 import java.util.UUID
 
-final case class CustomerId private(value: UUID)
+final case class CustomerId(value: UUID) extends Id
 
 object CustomerId {
-  def generate: CustomerId.Unvalidated = CustomerId.Unvalidated(UUID.randomUUID.toString)
+  def generate: CustomerId = CustomerId(UUID.randomUUID)
 
-  def fromUUID(uuid: UUID) = CustomerId(uuid)
-
-  final case class Unvalidated(value: String) extends NotValidated[CustomerId] {
-    def validate: Validation[FailureDescription, CustomerId] =
-      uuid.apply(value).map(uuid => CustomerId.apply(UUID.fromString(uuid)))
-
-    def unsafeValidation: CustomerId = CustomerId(UUID.fromString(value))
-  }
+  def fromUUID(uuid: UUID): CustomerId = CustomerId(uuid)
 }

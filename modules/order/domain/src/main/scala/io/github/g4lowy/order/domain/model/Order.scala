@@ -1,13 +1,13 @@
 package io.github.g4lowy.order.domain.model
 
-import io.github.g4lowy.customer.domain.model.Customer
-import io.github.g4lowy.order.domain.model
+import io.github.g4lowy.abstractType.Id
+import io.github.g4lowy.order.domain.model.address.Address
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
-import io.github.g4lowy.validation.validators.{ NotValidated, Validation, Validator }
+import io.github.g4lowy.validation.validators.{NotValidated, Validation, Validator}
 
 final case class Order private (
   orderId: OrderId,
-  customer: Customer,
+  customerId: Id,
   orderStatus: OrderStatus,
   details: List[OrderDetail],
   paymentType: PaymentType,
@@ -21,8 +21,8 @@ final case class Order private (
 
 object Order {
   final case class Unvalidated(
-    orderId: OrderId.Unvalidated,
-    customer: Customer,
+    orderId: OrderId,
+    customerId: Id,
     details: List[OrderDetail.Unvalidated],
     paymentType: PaymentType,
     paymentAddress: Address.Unvalidated,
@@ -32,13 +32,12 @@ object Order {
   ) extends NotValidated[Order] {
     override def validate: Validation[FailureDescription, Order] =
       for {
-        orderId <- orderId.validate
-        details         <- Validator.validateIterable[OrderDetail, model.OrderDetail.Unvalidated](details)
+        details         <- Validator.validateIterable[OrderDetail, OrderDetail.Unvalidated](details)
         paymentAddress  <- paymentAddress.validate
         shipmentAddress <- Validator.validOrCheck[Address, Address.Unvalidated](shipmentAddress)
       } yield Order(
         orderId,
-        customer,
+        customerId,
         orderStatus,
         details.toList,
         paymentType,
@@ -49,14 +48,14 @@ object Order {
 
     override def unsafeValidation: Order =
       Order(
-        orderId.unsafeValidation,
-        customer,
+        orderId,
+        customerId,
         orderStatus,
         details.map(_.unsafeValidation),
         paymentType,
-        paymentAddress.unsafeValidation,
+        paymentAddress.validateUnsafe,
         shipmentType,
-        shipmentAddress.map(_.unsafeValidation)
+        shipmentAddress.map(_.validateUnsafe)
       )
   }
 }

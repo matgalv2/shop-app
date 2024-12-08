@@ -68,6 +68,7 @@ lazy val http = (project in file("http"))
     )
   )
   .dependsOn(
+    abstractTypes,
     error,
     unionTypes,
     customerDomain,
@@ -97,9 +98,13 @@ lazy val testUtils = (project in file("/modules/common/testUtils"))
   .settings(libraryDependencies += Dependencies.zio.config.typesafeConfig)
   .settings(libraryDependencies += Dependencies.zio.config.magnolia)
   .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+  .dependsOn(validation)
 
 lazy val unionTypes = (project in file("/modules/common/unionTypes"))
   .settings(name := "union-types")
+
+lazy val abstractTypes = (project in file("/modules/common/abstractTypes"))
+  .settings(name := "abstract-types")
 
 lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(name := "customer-domain")
@@ -107,7 +112,7 @@ lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation)
+  .dependsOn(validation, abstractTypes)
 
 lazy val customerInfrastructure = (project in file("/modules/customer/infrastructure"))
   .settings(name := "customer-infrastructure")
@@ -123,7 +128,7 @@ lazy val productDomain = (project in file("/modules/product/domain"))
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation)
+  .dependsOn(validation, abstractTypes)
 
 lazy val productInfrastructure = (project in file("/modules/product/infrastructure"))
   .settings(name := "product-infrastructure")
@@ -139,7 +144,7 @@ lazy val orderDomain = (project in file("/modules/order/domain"))
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation, productDomain, customerDomain)
+  .dependsOn(validation, productDomain, customerDomain, abstractTypes)
 
 lazy val orderInfrastructure = (project in file("/modules/order/infrastructure"))
   .settings(name := "order-infrastructure")

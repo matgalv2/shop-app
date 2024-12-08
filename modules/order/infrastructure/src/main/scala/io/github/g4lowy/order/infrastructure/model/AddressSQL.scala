@@ -1,7 +1,6 @@
 package io.github.g4lowy.order.infrastructure.model
 
-import io.github.g4lowy.order.domain.model.Address
-import io.github.g4lowy.order.domain.model.Address._
+import io.github.g4lowy.order.domain.model.address._
 
 import java.util.UUID
 
@@ -17,7 +16,7 @@ final case class AddressSQL(
 
   def toUnvalidated: Address.Unvalidated =
     Address.Unvalidated(
-      addressId = AddressId.Unvalidated(addressId.toString),
+      addressId = AddressId.fromUUID(addressId),
       country   = Country.Unvalidated(country),
       city      = City.Unvalidated(city),
       street    = Street.Unvalidated(street),

@@ -2,11 +2,12 @@ package io.github.g4lowy.order.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
+import io.github.g4lowy.abstractType.Id
 import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPostgres
-import io.github.g4lowy.order.domain.model.Address._
 import io.github.g4lowy.order.domain.model._
+import io.github.g4lowy.order.domain.model.address._
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, OrderSQL}
 import io.github.g4lowy.product.domain.model._
@@ -63,12 +64,12 @@ object OrderRepositorySpec extends ZIOSpecDefault {
               pricePerUnit = validatedProduct.price.value
             )
 
-            order = makeOrder(orderId, validatedCustomer, List(orderDetail))
+            order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail))
             validatedOrder <- ZIO.fromNotValidated(order)
             beforeAdd      <- OrderRepository.getAll(0, 10)
             id             <- OrderRepository.create(validatedOrder)
             afterAdd       <- OrderRepository.getAll(0, 10)
-          } yield assertTrue(id.value.toString == orderId.value && beforeAdd.isEmpty && afterAdd.size == 1)
+          } yield assertTrue(id.value == orderId.value && beforeAdd.isEmpty && afterAdd.size == 1)
         }
 //        test("fetch product by id") {
 //          val id      = UUID.randomUUID()
@@ -163,7 +164,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
     description: Option[String] = None
   ): Product.Unvalidated =
     Product.Unvalidated(
-      ProductId.Unvalidated(id),
+      ProductId.fromUUID(UUID.fromString(id)),
       Name.Unvalidated(name),
       Price.Unvalidated(price),
       description.map(Description.Unvalidated.apply)
@@ -171,7 +172,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
 
   private def makeCustomer(id: String) =
     Customer.Unvalidated(
-      customerId = CustomerId.Unvalidated(id),
+      customerId = CustomerId.fromUUID(UUID.fromString(id)),
       firstName  = FirstName.Unvalidated("Rufus"),
       lastName   = LastName.Unvalidated("Goldenek"),
       birthDate  = Some(Date.valueOf("2009-03-05")),
@@ -180,7 +181,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
     )
   private def makeAddress(id: String) =
     Address.Unvalidated(
-      addressId = Address.AddressId.Unvalidated(id),
+      addressId = AddressId.fromUUID(UUID.fromString(id)),
       country   = Country.Unvalidated("Ireland"),
       city      = City.Unvalidated("Dublin"),
       street    = Street.Unvalidated("Paderewskiego"),
@@ -190,8 +191,8 @@ object OrderRepositorySpec extends ZIOSpecDefault {
     )
 
   private def makeOrder(
-    orderId: OrderId.Unvalidated,
-    customer: Customer,
+    orderId: OrderId,
+    customerId: Id,
     details: List[OrderDetail.Unvalidated],
     addressesId: => String = UUID.randomUUID().toString
   ) = {
@@ -199,7 +200,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
     val address2 = makeAddress(addressesId)
     Order.Unvalidated(
       orderId         = orderId,
-      customer        = customer,
+      customerId      = customerId,
       details         = details,
       paymentType     = PaymentType.Card,
       paymentAddress  = address1,

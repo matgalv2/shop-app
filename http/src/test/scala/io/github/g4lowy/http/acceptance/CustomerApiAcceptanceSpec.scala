@@ -1,16 +1,16 @@
 package io.github.g4lowy.http.acceptance
 
-import io.github.g4lowy.http.AppEnvironment
-import io.github.g4lowy.http.api.CustomerApi
-import zio._
-import org.http4s._
-import org.http4s.implicits.http4sLiteralsSyntax
-import org.http4s.circe._
-import io.circe.{ Json, JsonObject }
+import io.circe.{Json, JsonObject}
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.getquill.mirrorContextWithQueryProbing.{ querySchema, quote }
+import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
+import io.github.g4lowy.http.AppEnvironment
+import io.github.g4lowy.http.api.CustomerApi
+import org.http4s._
+import org.http4s.circe._
+import org.http4s.implicits.http4sLiteralsSyntax
+import zio._
 
 class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
@@ -65,7 +65,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       Then("the response should be 204 Created")
       response.status shouldBe Status.Created
-      body.asObject.exists(_.contains("customerId")) shouldBe true
+      body.asObject.exists(_.contains("value")) shouldBe true
 
     }
 
@@ -101,7 +101,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("customerId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -113,11 +113,11 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
       val response = handleRequest(request)
       val body     = mapResponseBodyToJson(response)
 
-      val returnedCustomerId  = body.asObject.flatMap(_.apply("customerId")).flatMap(_.asString).getOrElse("")
-      val returnedFirstName = body.asObject.flatMap(_.apply("firstName")).flatMap(_.asString).getOrElse("")
-      val returnedLastName  = body.asObject.flatMap(_.apply("lastName")).flatMap(_.asString).getOrElse("")
-      val returnedBirthDate = body.asObject.flatMap(_.apply("birthDate")).flatMap(_.asString).getOrElse("")
-      val returnedPhone     = body.asObject.flatMap(_.apply("phone")).flatMap(_.asString).getOrElse("")
+      val returnedCustomerId = body.asObject.flatMap(_.apply("customerId")).flatMap(_.asString).getOrElse("")
+      val returnedFirstName  = body.asObject.flatMap(_.apply("firstName")).flatMap(_.asString).getOrElse("")
+      val returnedLastName   = body.asObject.flatMap(_.apply("lastName")).flatMap(_.asString).getOrElse("")
+      val returnedBirthDate  = body.asObject.flatMap(_.apply("birthDate")).flatMap(_.asString).getOrElse("")
+      val returnedPhone      = body.asObject.flatMap(_.apply("phone")).flatMap(_.asString).getOrElse("")
 
       Then("the response should be 200 Ok")
       response.status shouldBe Status.Ok
@@ -149,7 +149,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("customerId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -168,7 +168,8 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
       val fetchResponse     = handleRequest(fetchRequest)
       val fetchResponseBody = mapResponseBodyToJson(fetchResponse)
 
-      val returnedCustomerId  = fetchResponseBody.asObject.flatMap(_.apply("customerId")).flatMap(_.asString).getOrElse("")
+      val returnedCustomerId =
+        fetchResponseBody.asObject.flatMap(_.apply("customerId")).flatMap(_.asString).getOrElse("")
       val returnedFirstName = fetchResponseBody.asObject.flatMap(_.apply("firstName")).flatMap(_.asString).getOrElse("")
       val returnedLastName  = fetchResponseBody.asObject.flatMap(_.apply("lastName")).flatMap(_.asString).getOrElse("")
       val returnedBirthDate = fetchResponseBody.asObject.flatMap(_.apply("birthDate")).flatMap(_.asString).getOrElse("")
@@ -193,7 +194,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("customerId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -232,7 +233,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("customerId"))
+          .flatMap(_.apply("value"))
           .flatMap(_.asString)
           .getOrElse("")
 
@@ -268,7 +269,7 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     "return response 404 Not found for deleting customer by id (DELETE '/customers/{customerId}')" in {
       Given("the request for deleting nonexistent customer by id")
       val deleteCustomerUri = Uri.fromString(s"/customers/$nonExistentId").getOrElse(uri"")
-      val request         = Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = deleteCustomerUri)
+      val request           = Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = deleteCustomerUri)
 
       When("the request is processed")
       val response = handleRequest(request)

@@ -2,21 +2,21 @@ package io.github.g4lowy.customer.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.getquill.mirrorContextWithQueryProbing.{ querySchema, quote }
-import io.github.g4lowy.customer.domain.model.{ Customer, CustomerId, FirstName, LastName, Phone }
-import io.github.g4lowy.test.utils.AppTestConfig
+import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
+import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{ dataSource, postgresLive }
+import io.github.g4lowy.test.utils.AppTestConfig
+import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{dataSource, postgresLive}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
-import io.github.g4lowy.validation.validators.{ Validation, Validator }
+import io.github.g4lowy.validation.validators.{Validation, Validator}
 import zio.test.TestAspect.sequential
-import zio.{ Chunk, Scope, ZIO, ZLayer }
 import zio.test._
+import zio.{Chunk, Scope, ZIO, ZLayer}
 
 import java.sql.Date
-import java.time.{ LocalDate, LocalDateTime }
+import java.time.{LocalDate, LocalDateTime}
 import java.util.UUID
 
 object CustomerRepositorySpec extends ZIOSpecDefault {
@@ -60,7 +60,7 @@ object CustomerRepositorySpec extends ZIOSpecDefault {
           } yield assertTrue(
             beforeAdd == 0,
             afterAdd.size == 1,
-            afterAdd.head.customerId.value.toString == customer.customerId.value
+            afterAdd.head.customerId.value == customer.customerId.value
           )
 
         },
@@ -82,7 +82,7 @@ object CustomerRepositorySpec extends ZIOSpecDefault {
         },
         test("fail when id is not found") {
           for {
-            newId           <- ZIO.fromNotValidated(CustomerId.Unvalidated(UUID.randomUUID().toString))
+            newId           <- ZIO.succeed(CustomerId.generate)
             fetchedCustomer <- CustomerRepository.getById(newId).exit
           } yield assertTrue(fetchedCustomer.isFailure)
         },
@@ -128,7 +128,7 @@ object CustomerRepositorySpec extends ZIOSpecDefault {
         },
         test("fail when id is not found") {
           for {
-            newId  <- ZIO.fromNotValidated(CustomerId.Unvalidated(UUID.randomUUID().toString))
+            newId  <- ZIO.succeed(CustomerId.generate)
             result <- CustomerRepository.delete(newId).exit
           } yield assertTrue(result.isFailure)
         }
@@ -165,7 +165,7 @@ object CustomerRepositorySpec extends ZIOSpecDefault {
     phone: String
   ): Customer.Unvalidated =
     Customer.Unvalidated(
-      CustomerId.Unvalidated(id),
+      CustomerId(UUID.fromString(id)),
       FirstName.Unvalidated(firstName),
       LastName.Unvalidated(lastName),
       birthDate,

@@ -16,15 +16,14 @@ package object error {
   }
 
   implicit val productErrorNotFound: ErrorMessage[ProductError.NotFound] = {
-    case ProductError.NotFound(productId) =>
-      s"Product with id: $productId was not found"
-    case ProductError.NotFound(productId, productIds @ _*) =>
+    case ProductError.NotFound(productId, productIds) =>
       s"Products with ids: [$productId, ${productIds.mkString(",")}] were not found"
   }
 
   implicit val orderError: ErrorMessage[OrderError] = {
     case error: OrderError.NotFound      => orderErrorNotFound.message(error)
     case error: OrderError.InvalidStatus => orderErrorInvalidStatus.message(error)
+    case error: OrderError.ProductsNotFound => orderErrorProductsNotFound.message(error)
   }
 
   implicit val orderErrorNotFound: ErrorMessage[OrderError.NotFound] = { case OrderError.NotFound(orderId) =>
@@ -34,5 +33,10 @@ package object error {
   implicit val orderErrorInvalidStatus: ErrorMessage[OrderError.InvalidStatus] = {
     case OrderError.InvalidStatus(orderId, status) =>
       s"Status od an order with id: $orderId can not be set to $status"
+  }
+
+  implicit val orderErrorProductsNotFound: ErrorMessage[OrderError.ProductsNotFound] = {
+    case OrderError.ProductsNotFound(productId, productsIds) =>
+      s"Products with ids: [$productId, ${productsIds.mkString(",")}] were not found"
   }
 }

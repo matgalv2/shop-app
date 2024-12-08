@@ -1,6 +1,6 @@
 package io.github.g4lowy.customer.infrastructure.model
 
-import io.github.g4lowy.customer.domain.model.{ Customer, CustomerId, FirstName, LastName, Phone }
+import io.github.g4lowy.customer.domain.model._
 
 import java.sql.Date
 import java.time.LocalDateTime
@@ -14,18 +14,16 @@ case class CustomerSQL(
   phone: String,
   createdAt: LocalDateTime
 ) {
-  def toUnvalidated: Customer.Unvalidated =
+  def toDomain: Customer.Unvalidated =
     Customer
       .Unvalidated(
-        customerId = CustomerId.Unvalidated(customerId.toString),
+        customerId = CustomerId.fromUUID(customerId),
         firstName  = FirstName.Unvalidated(firstName),
         lastName   = LastName.Unvalidated(lastName),
         birthDate  = birthDate,
         phone      = Phone.Unvalidated(phone),
         createdAt  = createdAt
       )
-
-  def toDomain: Customer = toUnvalidated.unsafeValidation
 }
 
 object CustomerSQL {
