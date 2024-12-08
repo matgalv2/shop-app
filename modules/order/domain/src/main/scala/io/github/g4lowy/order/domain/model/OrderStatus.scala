@@ -3,7 +3,7 @@ package io.github.g4lowy.order.domain.model
 import io.github.g4lowy.order.domain.model.OrderStatus.values
 
 sealed abstract class OrderStatus(val value: String) {
-  def canBeReplacedBy(orderStatus: OrderStatus): Boolean = values.indexOf(this) > values.indexOf(orderStatus)
+  def canBeReplacedBy(orderStatus: OrderStatus): Boolean = values.indexOf(this) <= values.indexOf(orderStatus)
 }
 
 object OrderStatus {
