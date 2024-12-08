@@ -211,6 +211,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
       phone      = Phone.Unvalidated("+48-20241026"),
       createdAt  = LocalDateTime.now()
     )
+
   private def makeAddress(id: String) =
     Address.Unvalidated(
       addressId = AddressId.fromUUID(UUID.fromString(id)),
