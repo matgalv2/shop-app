@@ -29,25 +29,39 @@ object OrderRepositorySpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] = {
     Spec.multiple {
       Chunk(
-//        test("fetch all products") {
-//          val productId1 = UUID.randomUUID().toString
-//          val productId2 = UUID.randomUUID().toString
-//          val product1   = makeProduct(productId1, "Product1 ", 3.59, Some("some description"))
-//          val product2   = makeProduct(productId2, "Product2", 17.33, None)
-//          val products   = List(product1, product2)
-//
-//          val validation: Validation[FailureDescription, Iterable[Product]] =
-//            Validator.validateIterable[Product, Product.Unvalidated](products)
-//          for {
-//            validated <- ZIO.fromValidation(validation)
-//            _         <- ZIO.foreachDiscard(validated)(ProductRepository.create)
-//            actual    <- ProductRepository.getAll
-//          } yield assertTrue(
-//            actual.size == 2,
-//            actual.map(_.productId.value.toString).contains(productId1),
-//            actual.map(_.productId.value.toString).contains(productId2)
-//          )
-//        },
+        test("fetch all orders") {
+          val product  = makeProduct(UUID.randomUUID().toString)
+          val customer = makeCustomer(UUID.randomUUID().toString)
+          val orderId1 = OrderId.generate
+          val orderId2 = OrderId.generate
+          for {
+            validatedProduct  <- ZIO.fromNotValidated(product)
+            _                 <- ProductRepository.create(validatedProduct)
+            validatedCustomer <- ZIO.fromNotValidated(customer)
+            _                 <- CustomerRepository.create(validatedCustomer)
+            orderDetail1 = OrderDetail.Unvalidated(
+              orderId      = orderId1,
+              productId    = product.productId,
+              quantity     = 1,
+              pricePerUnit = validatedProduct.price.value
+            )
+            orderDetail2 = OrderDetail.Unvalidated(
+              orderId      = orderId2,
+              productId    = product.productId,
+              quantity     = 1,
+              pricePerUnit = validatedProduct.price.value
+            )
+
+            order1 = makeOrder(orderId1, validatedCustomer.customerId, List(orderDetail1))
+            order2 = makeOrder(orderId2, validatedCustomer.customerId, List(orderDetail2))
+            validatedOrder1 <- ZIO.fromNotValidated(order1)
+            validatedOrder2 <- ZIO.fromNotValidated(order2)
+            beforeAdd       <- OrderRepository.getAll(0, 10)
+            _               <- OrderRepository.create(validatedOrder1)
+            _               <- OrderRepository.create(validatedOrder2)
+            afterAdd        <- OrderRepository.getAll(0, 10)
+          } yield assertTrue(beforeAdd.isEmpty, afterAdd.size == 2)
+        },
         test("create order") {
           val product  = makeProduct(UUID.randomUUID().toString)
           val customer = makeCustomer(UUID.randomUUID().toString)
@@ -70,65 +84,87 @@ object OrderRepositorySpec extends ZIOSpecDefault {
             id             <- OrderRepository.create(validatedOrder)
             afterAdd       <- OrderRepository.getAll(0, 10)
           } yield assertTrue(id.value == orderId.value && beforeAdd.isEmpty && afterAdd.size == 1)
+        },
+        test("fetch order by id") {
+          val product  = makeProduct(UUID.randomUUID().toString)
+          val customer = makeCustomer(UUID.randomUUID().toString)
+          val orderId  = OrderId.generate
+          for {
+            validatedProduct  <- ZIO.fromNotValidated(product)
+            _                 <- ProductRepository.create(validatedProduct)
+            validatedCustomer <- ZIO.fromNotValidated(customer)
+            _                 <- CustomerRepository.create(validatedCustomer)
+            orderDetail1 = OrderDetail.Unvalidated(
+              orderId      = orderId,
+              productId    = product.productId,
+              quantity     = 1,
+              pricePerUnit = validatedProduct.price.value
+            )
+
+            order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
+            validatedOrder1 <- ZIO.fromNotValidated(order)
+            beforeAdd       <- OrderRepository.getAll(0, 10)
+            _               <- OrderRepository.create(validatedOrder1)
+            orderFetched    <- OrderRepository.getById(order.orderId)
+          } yield assertTrue(beforeAdd.isEmpty, orderFetched.orderId == order.orderId)
+        },
+        test("fail when id is not found") {
+          val id = OrderId.generate
+          for {
+            fetchedClient <- OrderRepository.getById(id).exit
+          } yield assertTrue(fetchedClient.isFailure)
+        },
+        test("update order's status by id") {
+          val product  = makeProduct(UUID.randomUUID().toString)
+          val customer = makeCustomer(UUID.randomUUID().toString)
+          val orderId  = OrderId.generate
+          for {
+            validatedProduct  <- ZIO.fromNotValidated(product)
+            _                 <- ProductRepository.create(validatedProduct)
+            validatedCustomer <- ZIO.fromNotValidated(customer)
+            _                 <- CustomerRepository.create(validatedCustomer)
+            orderDetail1 = OrderDetail.Unvalidated(
+              orderId      = orderId,
+              productId    = product.productId,
+              quantity     = 1,
+              pricePerUnit = validatedProduct.price.value
+            )
+
+            order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
+            validatedOrder1 <- ZIO.fromNotValidated(order)
+            _               <- OrderRepository.create(validatedOrder1)
+            result          <- OrderRepository.updateStatus(orderId, OrderStatus.Paid).exit
+          } yield assertTrue(result.isSuccess)
+        },
+        test("fails when trying to downgrade order's status") {
+          val product  = makeProduct(UUID.randomUUID().toString)
+          val customer = makeCustomer(UUID.randomUUID().toString)
+          val orderId  = OrderId.generate
+          for {
+            validatedProduct  <- ZIO.fromNotValidated(product)
+            _                 <- ProductRepository.create(validatedProduct)
+            validatedCustomer <- ZIO.fromNotValidated(customer)
+            _                 <- CustomerRepository.create(validatedCustomer)
+            orderDetail1 = OrderDetail.Unvalidated(
+              orderId      = orderId,
+              productId    = product.productId,
+              quantity     = 1,
+              pricePerUnit = validatedProduct.price.value
+            )
+
+            order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
+            validatedOrder1 <- ZIO.fromNotValidated(order)
+            _               <- OrderRepository.create(validatedOrder1)
+            _               <- OrderRepository.updateStatus(orderId, OrderStatus.Sent)
+            result          <- OrderRepository.updateStatus(orderId, OrderStatus.Paid).exit
+          } yield assertTrue(result.isFailure)
+        },
+        test("fail when id is not found") {
+          val id = OrderId.generate
+          for {
+            fetchedClient <- OrderRepository.updateStatus(id, OrderStatus.Cancelled).exit
+          } yield assertTrue(fetchedClient.isFailure)
         }
-//        test("fetch product by id") {
-//          val id      = UUID.randomUUID()
-//          val product = makeProduct(id.toString)
-//          for {
-//            validated     <- ZIO.fromNotValidated(product)
-//            _             <- ProductRepository.create(validated)
-//            fetchedClient <- ProductRepository.getById(validated.productId)
-//          } yield assertTrue(
-//            fetchedClient.productId.value == id,
-//            fetchedClient.name.value == product.name.value,
-//            fetchedClient.price.value == product.price.value,
-//            fetchedClient.description.map(_.value) == product.description.map(_.value)
-//          )
-//        },
-//        test("fail when id is not found") {
-//          for {
-//            newId         <- ZIO.fromNotValidated(ProductId.Unvalidated(UUID.randomUUID().toString))
-//            fetchedClient <- ProductRepository.getById(newId).exit
-//          } yield assertTrue(fetchedClient.isFailure)
-//        },
-//        test("update product by id") {
-//          val id      = UUID.randomUUID()
-//          val client  = makeProduct(id.toString)
-//          val updated = client.copy(name = Name.Unvalidated("O'Updated"))
-//          for {
-//            validated        <- ZIO.fromNotValidated(client)
-//            _                <- ProductRepository.create(validated)
-//            updateValidation <- ZIO.fromNotValidated(updated)
-//            _                <- ProductRepository.update(validated.productId, updateValidation)
-//            fetchedClient    <- ProductRepository.getById(validated.productId)
-//          } yield assertTrue(
-//            fetchedClient.productId.value == id,
-//            fetchedClient.name.value == updateValidation.name.value
-//          )
-//        },
-//        test("fail when id is not found") {
-//
-//          val updated = makeProduct(UUID.randomUUID().toString)
-//          for {
-//            updateValidation <- ZIO.fromNotValidated(updated)
-//            result           <- ProductRepository.update(updateValidation.productId, updateValidation).exit
-//          } yield assertTrue(result.isFailure)
-//        },
-//        test("delete product by id") {
-//          val id     = UUID.randomUUID()
-//          val client = makeProduct(id.toString)
-//          for {
-//            validated <- ZIO.fromNotValidated(client)
-//            _         <- ProductRepository.create(validated)
-//            result    <- ProductRepository.delete(validated.productId).exit
-//          } yield assertTrue(result.isSuccess)
-//        },
-//        test("fail when id is not found") {
-//          for {
-//            newId  <- ZIO.fromNotValidated(ProductId.Unvalidated(UUID.randomUUID().toString))
-//            result <- ProductRepository.delete(newId).exit
-//          } yield assertTrue(result.isFailure)
-//        }
       )
     } @@ sequential @@ cleanTableBeforeAll @@ cleanTableAfterEach
   }.provide(
