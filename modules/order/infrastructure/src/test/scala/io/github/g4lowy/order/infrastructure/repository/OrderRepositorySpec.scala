@@ -51,7 +51,6 @@ object OrderRepositorySpec extends ZIOSpecDefault {
               quantity     = 1,
               pricePerUnit = validatedProduct.price.value
             )
-
             order1 = makeOrder(orderId1, validatedCustomer.customerId, List(orderDetail1))
             order2 = makeOrder(orderId2, validatedCustomer.customerId, List(orderDetail2))
             validatedOrder1 <- ZIO.fromNotValidated(order1)
@@ -77,7 +76,6 @@ object OrderRepositorySpec extends ZIOSpecDefault {
               quantity     = 1,
               pricePerUnit = validatedProduct.price.value
             )
-
             order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail))
             validatedOrder <- ZIO.fromNotValidated(order)
             beforeAdd      <- OrderRepository.getAll(0, 10)
@@ -129,7 +127,6 @@ object OrderRepositorySpec extends ZIOSpecDefault {
               quantity     = 1,
               pricePerUnit = validatedProduct.price.value
             )
-
             order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
             validatedOrder1 <- ZIO.fromNotValidated(order)
             _               <- OrderRepository.create(validatedOrder1)
@@ -151,7 +148,6 @@ object OrderRepositorySpec extends ZIOSpecDefault {
               quantity     = 1,
               pricePerUnit = validatedProduct.price.value
             )
-
             order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
             validatedOrder1 <- ZIO.fromNotValidated(order)
             _               <- OrderRepository.create(validatedOrder1)
