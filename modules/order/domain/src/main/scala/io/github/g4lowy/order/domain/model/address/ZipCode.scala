@@ -10,7 +10,7 @@ object ZipCode {
   final case class Unvalidated(value: String) extends NotValidated[ZipCode] {
 
     override def validate: Validation[FailureDescription, ZipCode] =
-      matchesRegex("^[0-9]{2}-[0-9]{3}$".r).apply(value).map(ZipCode.apply)
+      matchesRegex("^\\d{2}-\\d{3}$".r).apply(value).map(ZipCode.apply)
 
     override def unsafeValidation: ZipCode = ZipCode.apply(value)
 

@@ -9,7 +9,7 @@ object Apartment {
   final case class Unvalidated(value: String) extends NotValidated[Apartment] {
 
     override def validate: Validation[FailureDescription, Apartment] =
-      matchesRegex("^[0-9]*[A-z]*$".r).apply(value).map(Apartment.apply)
+      matchesRegex("^\\d{1,5}$".r).apply(value).map(Apartment.apply)
 
     override protected def unsafeValidation: Apartment = Apartment.apply(value)
 
