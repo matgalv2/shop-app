@@ -5,14 +5,14 @@ Simple CRUD REST-based application for managing online store. Database consists 
 
 
 ### Progress
-![](https://geps.dev/progress/80?dangerColor=800000&warningColor=ff9900&successColor=006600)
+![](https://geps.dev/progress/100?dangerColor=800000&warningColor=ff9900&successColor=006600)
 
 |                   | Customers | Products | Orders |
 |-------------------|-----------|----------|--------|
 | Implementation    | ✅         | ✅        | ✅      |
-| Unit Tests        | ✅         | ✅        | ❌      |
-| Integration Tests | ✅         | ✅        | ❌      |
-| Acceptance Tests  | ✅         | ✅        | ❌      |
+| Unit Tests        | ✅         | ✅        | ✅      |
+| Integration Tests | ✅         | ✅        | ✅      |
+| Acceptance Tests  | ✅         | ✅        | ✅      |
 
 ## Technology & tools:
 Technology stack:
