@@ -14,9 +14,9 @@ import zio._
 
 class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
-  override val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = CustomerApi.routes
+  override protected val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = CustomerApi.routes
 
-  override def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
+  override protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
         quill.run(quote(querySchema[CustomerSQL]("Customers").delete))

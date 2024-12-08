@@ -6,16 +6,16 @@ import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
+import org.http4s._
 import org.http4s.circe._
 import org.http4s.implicits.http4sLiteralsSyntax
-import org.http4s._
 import zio.{RIO, URIO, ZIO}
 
 class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
-  override val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = ProductApi.routes
+  override protected val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = ProductApi.routes
 
-  override def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
+  override protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
         quill.run(quote(querySchema[ProductSQL]("Products").delete))

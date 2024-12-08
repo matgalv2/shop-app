@@ -25,15 +25,19 @@ abstract class ApiAcceptanceSpec
     with BeforeAndAfterAll
     with BeforeAndAfterEach {
 
-  val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]]
+  protected val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]]
 
-  def cleanData: URIO[Quill.Postgres[CamelCase], Unit]
+  protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit]
 
-  override def beforeAll: Unit = runEffect(cleanData.provide(dependencies))
+  override protected def beforeAll: Unit = runEffect(cleanData.provide(dependencies))
 
-  override def afterEach: Unit = runEffect(cleanData.provide(dependencies))
+  override protected def afterEach: Unit = runEffect(cleanData.provide(dependencies))
 
-  private def runEffect[E, A](effect: ZIO[Any, E, A]): A =
+  protected def cleanOtherData: URIO[Quill.Postgres[CamelCase], Unit] = ZIO.unit
+
+  override protected def afterAll: Unit = runEffect(cleanOtherData.provide(dependencies))
+
+  protected def runEffect[E, A](effect: ZIO[Any, E, A]): A =
     Unsafe.unsafe { implicit unsafe =>
       Runtime.default.unsafe
         .run(effect)
@@ -43,7 +47,7 @@ abstract class ApiAcceptanceSpec
   private val dataSource = runEffect(
     TestDatabaseConfiguration.dataSource.provide(AppTestConfig.acceptanceTestConfigLive)
   )
-  private val dependencies =
+  protected val dependencies =
     ZLayer.succeed(
       dataSource
     ) >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ OrderRepositoryPostgres.live
