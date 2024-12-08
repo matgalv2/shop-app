@@ -1,28 +1,21 @@
 package io.github.g4lowy.http.api
 
-import http.generated.definitions.{ CreateOrder, ErrorResponse, PatchOrder }
+import http.generated.definitions.{CreateOrder, ErrorResponse, PatchOrder}
 import http.generated.orders
-import http.generated.orders.{
-  CreateOrderResponse,
-  GetAllOrdersResponse,
-  GetOrderByIdResponse,
-  OrdersHandler,
-  OrdersResource,
-  UpdateStatusResponse
-}
+import http.generated.orders._
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.OrderApi.Environment
-import io.github.g4lowy.http.converters.orders.{ CreateOrderOps, OrderIdOps, OrderOps, PatchOrderStatusOps }
+import io.github.g4lowy.http.converters.orders.{CreateOrderOps, OrderIdOps, OrderOps, PatchOrderStatusOps}
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.http.service.OrderService
-import io.github.g4lowy.order.domain.model.{ OrderError, OrderId }
+import io.github.g4lowy.order.domain.model.{OrderError, OrderId}
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.Union3
 import org.http4s.HttpRoutes
-import zio.{ &, RIO, Runtime, ZIO }
+import zio.{&, RIO, Runtime, URIO, ZIO}
 
 import java.util.UUID
 
@@ -75,7 +68,7 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
 object OrderApi {
   type Environment = OrderRepository & ProductRepository & CustomerRepository
 
-  val routes: RIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]] = {
+  val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]] = {
     import zio.interop.catz._
 
     ZIO

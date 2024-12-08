@@ -14,7 +14,7 @@ import io.github.g4lowy.customer.domain.model.CustomerId
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.http.api.CustomerApi.Environment
 import io.github.g4lowy.http.service.CustomerService
-import zio.{ RIO, Runtime, ZIO }
+import zio.{ RIO, Runtime, URIO, ZIO }
 import io.github.g4lowy.validation.extras._
 import io.github.g4lowy.http.converters.customers._
 import io.github.g4lowy.http.error._
@@ -77,7 +77,7 @@ class CustomerApi extends CustomersHandler[RIO[AppEnvironment, *]] {
 object CustomerApi {
   type Environment = CustomerRepository
 
-  val routes: ZIO[AppEnvironment, Nothing, HttpRoutes[RIO[AppEnvironment, *]]] = {
+  val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]] = {
     import zio.interop.catz._
 
     ZIO
