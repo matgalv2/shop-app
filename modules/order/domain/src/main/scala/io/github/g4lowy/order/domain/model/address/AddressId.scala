@@ -1,6 +1,6 @@
 package io.github.g4lowy.order.domain.model.address
 
-import io.github.g4lowy.abstractType.Id
+import io.github.g4lowy.abstracttype.Id
 
 import java.util.UUID
 

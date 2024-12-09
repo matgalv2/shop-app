@@ -1,7 +1,7 @@
 package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{CreateAddress, CreateOrder, CreateOrderDetail, GetAddress, GetOrder, GetOrderDetail, PatchOrder}
-import io.github.g4lowy.abstractType.Id.UUIDOps
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.http.dto.OrderDto
 import io.github.g4lowy.http.dto.OrderDto.{AddressDto, OrderDetailDto, PaymentTypeDto, ShipmentTypeDto}
 import io.github.g4lowy.order.domain.model._

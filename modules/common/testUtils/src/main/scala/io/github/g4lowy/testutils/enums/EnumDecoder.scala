@@ -1,4 +1,4 @@
-package io.github.g4lowy.test.utils.enums
+package io.github.g4lowy.testutils.enums
 
 trait EnumDecoder[T <: EnumSQL] {
 

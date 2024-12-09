@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.model
 
 import io.getquill.Embedded
-import io.github.g4lowy.abstractType.Id._
+import io.github.g4lowy.abstracttype.Id._
 import io.github.g4lowy.order.domain.model.{Order, OrderId}
 
 import java.util.UUID

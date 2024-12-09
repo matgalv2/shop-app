@@ -1,6 +1,6 @@
-package io.github.g4lowy.test.utils
+package io.github.g4lowy.testutils
 
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{dataSourceLive, flyway}
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.{dataSourceLive, flyway}
 import zio.{Scope, ZIO, ZIOAppArgs, ZIOAppDefault}
 
 object PostgresAcceptanceTestDatabaseMigrationRunner extends ZIOAppDefault {

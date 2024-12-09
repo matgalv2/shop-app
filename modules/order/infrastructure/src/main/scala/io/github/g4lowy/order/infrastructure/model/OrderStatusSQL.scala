@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.model
 
 import io.github.g4lowy.order.domain.model.OrderStatus
-import io.github.g4lowy.test.utils.enums.{EnumDecoder, EnumSQL}
+import io.github.g4lowy.testutils.enums.{EnumDecoder, EnumSQL}
 
 sealed abstract class OrderStatusSQL(val value: String) extends EnumSQL {
 

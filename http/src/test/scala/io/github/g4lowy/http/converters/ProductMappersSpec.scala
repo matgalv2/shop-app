@@ -3,7 +3,7 @@ package io.github.g4lowy.http.converters
 import http.generated.definitions.{CreateProduct, UpdateProduct}
 import io.github.g4lowy.http.converters.products._
 import io.github.g4lowy.product.domain.model._
-import io.github.g4lowy.test.utils.validation.ValidationOps
+import io.github.g4lowy.testutils.validation.ValidationOps
 import zio.Scope
 import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assertTrue}
 

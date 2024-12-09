@@ -1,12 +1,11 @@
-package io.github.g4lowy.test.utils
+package io.github.g4lowy.testutils
 
-import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.getquill.mirrorContextWithQueryProbing._
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
-import zio.{ ZIO, ZLayer }
+import zio.{ZIO, ZLayer}
 
 import javax.sql.DataSource
 

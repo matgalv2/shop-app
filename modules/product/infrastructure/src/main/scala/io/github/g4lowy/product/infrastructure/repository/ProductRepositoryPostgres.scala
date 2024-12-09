@@ -2,8 +2,7 @@ package io.github.g4lowy.product.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.github.g4lowy.abstractType.Id
-import io.github.g4lowy.abstractType.Id.UUIDOps
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.product.domain.model
 import io.github.g4lowy.product.domain.model.{Product, ProductError, ProductId}
 import io.github.g4lowy.product.domain.repository.ProductRepository
@@ -88,7 +87,7 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
       .unit
   }
 
-  override def getMany(productIds: List[Id]): IO[ProductError.NotFound, List[Product]] = {
+  override def getMany(productIds: List[ProductId]): IO[ProductError.NotFound, List[Product]] = {
     val ids = productIds.map(_.value)
     val result: ZIO[Any, SQLException, List[ProductSQL]] = run {
       quote {

@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.model
 
 import io.github.g4lowy.order.domain.model.PaymentType
-import io.github.g4lowy.test.utils.enums.{ EnumDecoder, EnumSQL }
+import io.github.g4lowy.testutils.enums.{EnumDecoder, EnumSQL}
 
 sealed abstract class PaymentTypeSQL(val value: String) extends EnumSQL {
   def toDomain: PaymentType = this match {

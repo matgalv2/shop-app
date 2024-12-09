@@ -6,8 +6,8 @@ import io.getquill.mirrorContextWithQueryProbing.{querySchema, quote}
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
-import io.github.g4lowy.test.utils.AppTestConfig
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
+import io.github.g4lowy.testutils.AppTestConfig
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.{Validation, Validator}

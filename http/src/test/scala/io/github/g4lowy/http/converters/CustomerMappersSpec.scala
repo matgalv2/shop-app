@@ -3,7 +3,7 @@ package io.github.g4lowy.http.converters
 import http.generated.definitions.{CreateCustomer, UpdateCustomer}
 import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.http.converters.customers._
-import io.github.g4lowy.test.utils.validation.ValidationOps
+import io.github.g4lowy.testutils.validation.ValidationOps
 import zio.Scope
 import zio.test._
 

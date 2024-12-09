@@ -2,7 +2,7 @@ package io.github.g4lowy.customer.domain.model
 
 
 
-import io.github.g4lowy.abstractType.Id
+import io.github.g4lowy.abstracttype.Id
 
 import java.util.UUID
 

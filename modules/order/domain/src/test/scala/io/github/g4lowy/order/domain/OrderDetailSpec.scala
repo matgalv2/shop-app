@@ -1,6 +1,6 @@
 package io.github.g4lowy.order.domain
 
-import io.github.g4lowy.abstractType.Id.UUIDOps
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model.{OrderDetail, OrderId}
 import zio.Scope
 import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assertTrue}

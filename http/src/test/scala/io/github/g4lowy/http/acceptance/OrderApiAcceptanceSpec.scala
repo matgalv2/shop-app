@@ -12,7 +12,7 @@ import io.github.g4lowy.http.api.OrderApi
 import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, OrderSQL}
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
-import io.github.g4lowy.test.utils.validation.ValidationOps
+import io.github.g4lowy.testutils.validation.ValidationOps
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.implicits.http4sLiteralsSyntax

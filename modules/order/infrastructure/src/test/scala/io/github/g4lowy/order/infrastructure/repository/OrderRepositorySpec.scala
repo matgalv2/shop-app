@@ -2,7 +2,7 @@ package io.github.g4lowy.order.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.github.g4lowy.abstractType.Id
+import io.github.g4lowy.abstracttype.Id
 import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPostgres
@@ -13,8 +13,8 @@ import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, 
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
-import io.github.g4lowy.test.utils.AppTestConfig
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
+import io.github.g4lowy.testutils.AppTestConfig
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import zio.test.TestAspect.sequential
 import zio.test._

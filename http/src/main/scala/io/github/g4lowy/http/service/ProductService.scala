@@ -1,6 +1,5 @@
 package io.github.g4lowy.http.service
 
-import io.github.g4lowy.abstractType.Id
 import io.github.g4lowy.product.domain.model.{Product, ProductError, ProductId}
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import zio.{URIO, ZIO}
@@ -9,7 +8,7 @@ object ProductService {
   def getProducts: URIO[ProductRepository, List[Product]] =
     ProductRepository.getAll
 
-  def getMany(ids: List[Id]): ZIO[ProductRepository, ProductError.NotFound, List[Product]] =
+  def getMany(ids: List[ProductId]): ZIO[ProductRepository, ProductError.NotFound, List[Product]] =
     ProductRepository.getMany(ids)
 
   def getProductById(productId: ProductId): ZIO[ProductRepository, ProductError.NotFound, Product] =

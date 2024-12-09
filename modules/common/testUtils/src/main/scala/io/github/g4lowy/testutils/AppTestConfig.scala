@@ -1,4 +1,4 @@
-package io.github.g4lowy.test.utils
+package io.github.g4lowy.testutils
 
 import zio.ULayer
 import zio.config._

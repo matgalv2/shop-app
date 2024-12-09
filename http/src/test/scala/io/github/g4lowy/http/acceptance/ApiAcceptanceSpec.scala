@@ -7,8 +7,8 @@ import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPos
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.order.infrastructure.repository.OrderRepositoryPostgres
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
-import io.github.g4lowy.test.utils.TestDatabaseConfiguration.postgresLive
-import io.github.g4lowy.test.utils.{AppTestConfig, TestDatabaseConfiguration}
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.postgresLive
+import io.github.g4lowy.testutils.{AppTestConfig, TestDatabaseConfiguration}
 import org.http4s.circe._
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.{HttpRoutes, Request, Response}

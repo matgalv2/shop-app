@@ -1,6 +1,6 @@
 package io.github.g4lowy.order.infrastructure.model
 
-import io.github.g4lowy.abstractType.Id._
+import io.github.g4lowy.abstracttype.Id._
 import io.github.g4lowy.order.domain.model.{OrderDetail, OrderId}
 
 import java.util.UUID

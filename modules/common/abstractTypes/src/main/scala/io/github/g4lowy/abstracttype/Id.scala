@@ -1,4 +1,4 @@
-package io.github.g4lowy.abstractType
+package io.github.g4lowy.abstracttype
 
 import java.util.UUID
 

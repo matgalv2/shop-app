@@ -1,6 +1,6 @@
 package io.github.g4lowy.http.service
 
-import io.github.g4lowy.abstractType.Id.UUIDOps
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.customer.domain.model.{CustomerError, CustomerId}
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.http.ValidationFailure
@@ -8,7 +8,7 @@ import io.github.g4lowy.http.converters.orders.{OrderDetailDtoOps, OrderDtoOps}
 import io.github.g4lowy.http.dto.OrderDto
 import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderStatus}
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.product.domain.model.ProductError
+import io.github.g4lowy.product.domain.model.{ProductError, ProductId}
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.Union3
 import io.github.g4lowy.validation.extras.ZIOValidationOps
@@ -37,7 +37,7 @@ object OrderService {
     val productIds = orderDto.orderDetails.map(_.productId.toId)
     for {
       productsAndDetailDTOs <- ProductService
-        .getMany(productIds.toList)
+        .getMany(productIds.map(id => ProductId.apply(id.value)).toList)
         .flatMap { foundProducts =>
           ZIO.foreach(orderDto.orderDetails) { detail =>
             foundProducts.find(_.productId.value == detail.productId) match {

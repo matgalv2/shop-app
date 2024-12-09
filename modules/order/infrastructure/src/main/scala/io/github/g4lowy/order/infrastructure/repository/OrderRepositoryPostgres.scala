@@ -2,7 +2,7 @@ package io.github.g4lowy.order.infrastructure.repository
 
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
-import io.github.g4lowy.abstractType.Id.UUIDOps
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderStatus}
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.model._
