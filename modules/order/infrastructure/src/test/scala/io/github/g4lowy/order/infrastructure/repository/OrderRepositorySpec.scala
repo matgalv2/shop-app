@@ -9,22 +9,25 @@ import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPos
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.model.address._
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, OrderSQL}
+import io.github.g4lowy.order.infrastructure.model.{ AddressSQL, OrderDetailSQL, OrderSQL }
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import io.github.g4lowy.testutils.AppTestConfig
-import io.github.g4lowy.testutils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.{ dataSourceLive, postgresLive }
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import zio.test.TestAspect.sequential
 import zio.test._
-import zio.{Chunk, Scope, ZIO}
+import zio.{ Chunk, Scope, ZIO }
 
 import java.sql.Date
 import java.time.LocalDateTime
 import java.util.UUID
 
 object OrderRepositorySpec extends ZIOSpecDefault {
+
+  private val DEFAULT_OFFSET = 0
+  private val DEFAULT_LIMIT  = 10
 
   override def spec: Spec[TestEnvironment with Scope, Any] = {
     Spec.multiple {
@@ -55,10 +58,10 @@ object OrderRepositorySpec extends ZIOSpecDefault {
             order2 = makeOrder(orderId2, validatedCustomer.customerId, List(orderDetail2))
             validatedOrder1 <- ZIO.fromNotValidated(order1)
             validatedOrder2 <- ZIO.fromNotValidated(order2)
-            beforeAdd       <- OrderRepository.getAll(0, 10)
+            beforeAdd       <- OrderRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
             _               <- OrderRepository.create(validatedOrder1)
             _               <- OrderRepository.create(validatedOrder2)
-            afterAdd        <- OrderRepository.getAll(0, 10)
+            afterAdd        <- OrderRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
           } yield assertTrue(beforeAdd.isEmpty, afterAdd.size == 2)
         },
         test("create order") {
@@ -78,9 +81,9 @@ object OrderRepositorySpec extends ZIOSpecDefault {
             )
             order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail))
             validatedOrder <- ZIO.fromNotValidated(order)
-            beforeAdd      <- OrderRepository.getAll(0, 10)
+            beforeAdd      <- OrderRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
             id             <- OrderRepository.create(validatedOrder)
-            afterAdd       <- OrderRepository.getAll(0, 10)
+            afterAdd       <- OrderRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
           } yield assertTrue(id.value == orderId.value && beforeAdd.isEmpty && afterAdd.size == 1)
         },
         test("fetch order by id") {
@@ -101,7 +104,7 @@ object OrderRepositorySpec extends ZIOSpecDefault {
 
             order = makeOrder(orderId, validatedCustomer.customerId, List(orderDetail1))
             validatedOrder1 <- ZIO.fromNotValidated(order)
-            beforeAdd       <- OrderRepository.getAll(0, 10)
+            beforeAdd       <- OrderRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
             _               <- OrderRepository.create(validatedOrder1)
             orderFetched    <- OrderRepository.getById(order.orderId)
           } yield assertTrue(beforeAdd.isEmpty, orderFetched.orderId == order.orderId)
