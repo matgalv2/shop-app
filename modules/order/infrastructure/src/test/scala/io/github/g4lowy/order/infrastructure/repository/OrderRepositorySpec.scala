@@ -9,16 +9,16 @@ import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPos
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.model.address._
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.order.infrastructure.model.{ AddressSQL, OrderDetailSQL, OrderSQL }
+import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, OrderSQL}
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import io.github.g4lowy.testutils.AppTestConfig
-import io.github.g4lowy.testutils.TestDatabaseConfiguration.{ dataSourceLive, postgresLive }
+import io.github.g4lowy.testutils.TestDatabaseConfiguration.{dataSourceLive, postgresLive}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import zio.test.TestAspect.sequential
 import zio.test._
-import zio.{ Chunk, Scope, ZIO }
+import zio.{Chunk, Scope, ZIO}
 
 import java.sql.Date
 import java.time.LocalDateTime
@@ -242,7 +242,8 @@ object OrderRepositorySpec extends ZIOSpecDefault {
       paymentAddress  = address1,
       shipmentType    = ShipmentType.Courier,
       shipmentAddress = Some(address2),
-      orderStatus     = OrderStatus.Created
+      orderStatus     = OrderStatus.Created,
+      createdAt       = LocalDateTime.now()
     )
   }
 }

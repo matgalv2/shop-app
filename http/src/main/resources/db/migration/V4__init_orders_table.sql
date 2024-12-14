@@ -10,6 +10,7 @@ CREATE TABLE Orders(
     shipmentType        SHIPMENT_TYPE   NOT NULL,
     shipmentAddressId   UUID,
     status              ORDER_STATUS    NOT NULL,
+    createdAt           TIMESTAMP       NOT NULL,
 
     PRIMARY KEY (orderId),
     FOREIGN KEY (paymentAddressId) REFERENCES Addresses (addressId),

@@ -227,6 +227,9 @@ components:
           enum: [COURIER, BOX, ON_PLACE]
         shipmentAddress:
           $ref: '#/components/schemas/GetAddress'
+        createdAt:
+          type: string
+          x-scala-type: java.time.LocalDateTime
       required:
         - orderId
         - customerId
@@ -236,6 +239,7 @@ components:
         - paymentType
         - paymentAddress
         - shipmentType
+        - createdAt
 
     CreateOrder:
       type: object

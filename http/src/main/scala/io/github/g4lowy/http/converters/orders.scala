@@ -9,6 +9,8 @@ import io.github.g4lowy.order.domain.model.address._
 import io.github.g4lowy.product.domain.model.Product
 import io.scalaland.chimney.dsl._
 
+import java.time.LocalDateTime
+
 object orders {
 
   // API -> DTO
@@ -125,6 +127,7 @@ object orders {
         .withFieldComputed(_.paymentAddress, _.paymentAddress.toDomain)
         .withFieldComputed(_.shipmentType, _.shipmentType.toDomain)
         .withFieldComputed(_.shipmentAddress, _.shipmentAddress.map(_.toDomain))
+        .withFieldConst(_.createdAt, LocalDateTime.now())
         .transform
   }
 

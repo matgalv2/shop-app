@@ -4,6 +4,7 @@ import io.getquill.Embedded
 import io.github.g4lowy.abstracttype.Id._
 import io.github.g4lowy.order.domain.model.{Order, OrderId}
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 final case class OrderSQL(
@@ -13,7 +14,8 @@ final case class OrderSQL(
   paymentType: PaymentTypeSQL,
   paymentAddressId: UUID,
   shipmentType: ShipmentTypeSQL,
-  shipmentAddressId: Option[UUID]
+  shipmentAddressId: Option[UUID],
+  createdAt: LocalDateTime
 ) extends Embedded {
 
   def toDomain(
@@ -29,7 +31,8 @@ final case class OrderSQL(
       paymentAddress  = paymentAddress.toUnvalidated,
       shipmentType    = shipmentType.toDomain,
       shipmentAddress = shipmentAddress.map(_.toUnvalidated),
-      details         = details.map(_.toDomain)
+      details         = details.map(_.toDomain),
+      createdAt       = createdAt
     )
 }
 
@@ -42,6 +45,7 @@ object OrderSQL {
       paymentType       = PaymentTypeSQL.fromDomain(order.paymentType),
       paymentAddressId  = order.paymentAddress.addressId.value,
       shipmentType      = ShipmentTypeSQL.fromDomain(order.shipmentType),
-      shipmentAddressId = order.shipmentAddress.map(_.addressId.value)
+      shipmentAddressId = order.shipmentAddress.map(_.addressId.value),
+      createdAt         = order.createdAt
     )
 }

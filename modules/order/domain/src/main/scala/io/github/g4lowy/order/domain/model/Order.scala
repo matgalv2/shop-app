@@ -5,6 +5,8 @@ import io.github.g4lowy.order.domain.model.address.Address
 import io.github.g4lowy.validation.validators.Validator.FailureDescription
 import io.github.g4lowy.validation.validators.{NotValidated, Validation, Validator}
 
+import java.time.LocalDateTime
+
 final case class Order private (
   orderId: OrderId,
   customerId: Id,
@@ -13,7 +15,8 @@ final case class Order private (
   paymentType: PaymentType,
   paymentAddress: Address,
   shipmentType: ShipmentType,
-  shipmentAddress: Option[Address]
+  shipmentAddress: Option[Address],
+  createdAt: LocalDateTime
 ) {
 
   def totalCost: BigDecimal = details.map(product => product.quantity * product.pricePerUnit).sum
@@ -28,7 +31,8 @@ object Order {
     paymentAddress: Address.Unvalidated,
     shipmentType: ShipmentType,
     shipmentAddress: Option[Address.Unvalidated],
-    orderStatus: OrderStatus
+    orderStatus: OrderStatus,
+    createdAt: LocalDateTime
   ) extends NotValidated[Order] {
     override def validate: Validation[FailureDescription, Order] =
       for {
@@ -43,7 +47,8 @@ object Order {
         paymentType,
         paymentAddress,
         shipmentType,
-        shipmentAddress
+        shipmentAddress,
+        createdAt
       )
 
     override def unsafeValidation: Order =
@@ -55,7 +60,8 @@ object Order {
         paymentType,
         paymentAddress.validateUnsafe,
         shipmentType,
-        shipmentAddress.map(_.validateUnsafe)
+        shipmentAddress.map(_.validateUnsafe),
+        createdAt
       )
   }
 }
