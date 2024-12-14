@@ -52,3 +52,9 @@ All APIs are described here:
 ### 4. Domain
 * Validation - to ensure all data flowing through app is valid, all the objects are validated before being used. 
 * ErrorMessage - special type class for all domain errors to easily transform them into error responses
+
+### 5. Data flow
+* To allow fetching reasonable number of some type of data all repositories supports fetching with offset and limit.
+
+## Possible future extensions
+* Adding contact info to order
