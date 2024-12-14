@@ -13,7 +13,7 @@ import io.github.g4lowy.http.service.OrderService
 import io.github.g4lowy.order.domain.model.{OrderError, OrderId}
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.domain.repository.ProductRepository
-import io.github.g4lowy.union.types.Union3
+import io.github.g4lowy.union.types.{Union2, Union3}
 import org.http4s.HttpRoutes
 import zio.{&, RIO, Runtime, URIO, ZIO}
 
@@ -57,8 +57,9 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
       .updateStatus(OrderId.fromUUID(orderId), body.status.toDomain)
       .mapBoth(
         {
-          case err: OrderError.NotFound      => respond.NotFound(ErrorResponse.single(err.toMessage))
-          case err: OrderError.InvalidStatus => respond.BadRequest(ErrorResponse.single(err.toMessage))
+          case _ @Union2.First(err: OrderError.NotFound) => respond.NotFound(ErrorResponse.single(err.toMessage))
+          case _ @Union2.Second(err: OrderError.InvalidStatus) =>
+            respond.BadRequest(ErrorResponse.single(err.toMessage))
         },
         _ => respond.NoContent
       )

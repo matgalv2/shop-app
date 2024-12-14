@@ -7,6 +7,7 @@ import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderSta
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
+import io.github.g4lowy.union.types.Union2
 import org.postgresql.util.PGobject
 import zio.{IO, UIO, URLayer, ZIO, ZLayer}
 
@@ -83,7 +84,7 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       ShipmentTypeSQL.decode(row.getString(index))
   }
 
-  override def create(order: Order): IO[OrderError.ProductsNotFound , OrderId] = {
+  override def create(order: Order): IO[OrderError.ProductsNotFound, OrderId] = {
 
     val insertPaymentAddress =
       run {
@@ -194,7 +195,10 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       case Right(order) => ZIO.succeed(order)
     }
 
-  override def updateStatus(orderId: OrderId, orderStatus: OrderStatus): IO[OrderError, Unit] = {
+  override def updateStatus(
+    orderId: OrderId,
+    orderStatus: OrderStatus
+  ): IO[Union2[OrderError.NotFound, OrderError.InvalidStatus], Unit] = {
 
     val fetchOrder = quote(orders.filter(_.orderId == lift(orderId.value)))
     val result     = run(quote(fetchOrder)).orDie
@@ -205,8 +209,8 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
           case Some(order) if order.status.toDomain.canBeReplacedBy(orderStatus) =>
             val orderStatusSql = OrderStatusSQL.fromDomain(orderStatus)
             run(quote(fetchOrder.update(_.status -> lift(orderStatusSql)))).orDie
-          case Some(_) => ZIO.fail(OrderError.InvalidStatus(orderId, orderStatus))
-          case None    => ZIO.fail(OrderError.NotFound(orderId))
+          case Some(_) => ZIO.fail(Union2.Second.apply(OrderError.InvalidStatus(orderId, orderStatus)))
+          case None    => ZIO.fail(Union2.First.apply(OrderError.NotFound(orderId)))
         }
       }.either
     }.orDie.flatMap {
