@@ -42,12 +42,18 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     )
   )
 
-  private val nonExistentId = "99999999-9999-9999-9999-2a035d9e16ba"
+  private val baseURL = uri"/products"
+
+  private val parametrizedURL = (id: String) => s"/products/$id"
+
+  private val returnedIdFieldName = "value"
 
   "Product API handler" must {
+
     "return response 201 Created for creating product (POST '/products')" in {
+
       Given("the request with valid data")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       When("the request is processed")
@@ -58,12 +64,12 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
       Then("the response should be 204 Created")
       response.status shouldBe Status.Created
       body.asObject.exists(_.contains("value")) shouldBe true
-
     }
 
     "return response 400 Bad request for creating product (POST '/products')" in {
+
       Given("the request with invalid data")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(invalidJson)
 
       When("the request is processed")
@@ -74,8 +80,9 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 200 Ok for fetching clients (GET '/products')" in {
+
       Given("the request for fetching all clients")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = uri"/products")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = baseURL)
 
       When("the request is processed")
       val response = handleRequest(request)
@@ -86,19 +93,19 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
     "return response 200 Ok for fetching product by id (GET '/products/{productId}')" in {
 
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for fetching existing client by id")
-      val getByIdUri = Uri.fromString(s"/products/$createdProductId").getOrElse(uri"/products/id")
+      val getByIdUri = uriFromString(parametrizedURL(createdProductId))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
 
       When("the request is processed")
@@ -121,9 +128,10 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 404 Not found for fetching product by id (GET '/products/{productId}')" in {
+
       Given("request with nonexistent id")
       val id         = nonExistentId
-      val getByIdUri = Uri.fromString(s"/products/$id").getOrElse(uri"/products/id")
+      val getByIdUri = uriFromString(parametrizedURL(id))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
 
       When("the request is processed")
@@ -134,20 +142,21 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 204 No content for updating product by id (PUT '/products/{productId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for updating existing product by id")
 
-      val updateUri = Uri.fromString(s"/products/$createdProductId").getOrElse(uri"")
+      val updateUri = uriFromString(parametrizedURL(createdProductId))
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateUri).withEntity(validUpdateJson)
 
@@ -155,7 +164,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val updateResponse = handleRequest(updateRequest)
 
-      val getByIdUri        = Uri.fromString(s"/products/$createdProductId").getOrElse(uri"/products/id")
+      val getByIdUri        = uriFromString(parametrizedURL(createdProductId))
       val fetchRequest      = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
       val fetchResponse     = handleRequest(fetchRequest)
       val fetchResponseBody = mapResponseBodyToJson(fetchResponse)
@@ -178,20 +187,21 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 400 Bad request for updating product by id (PUT '/products/{productId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
-      val createProductId =
+      val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for updating existing product by id with invalid body")
 
-      val updateUri = Uri.fromString(s"/products/$createProductId").getOrElse(uri"")
+      val updateUri = uriFromString(parametrizedURL(createdProductId))
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateUri).withEntity(invalidJson)
 
@@ -203,9 +213,10 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 404 Not found for updating product by id (PUT '/products/{productId}')" in {
+
       Given("the request for updating existing product by id with invalid body")
 
-      val updateUri = Uri.fromString(s"/products/$nonExistentId").getOrElse(uri"")
+      val updateUri = uriFromString(parametrizedURL(nonExistentId))
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateUri).withEntity(validUpdateJson)
 
@@ -217,18 +228,19 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 204 No content for deleting product by id (DELETE '/products/{productId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/products")
+
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
-      val createProductId =
+      val createdProductId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
-      val idUri = Uri.fromString(s"/products/$createProductId").getOrElse(uri"")
+      val idUri = uriFromString(parametrizedURL(createdProductId))
 
       Given("the request for deleting existing product by id")
 
@@ -250,15 +262,10 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
       fetchAfterDeleteResponse.status shouldBe Status.NotFound
     }
 
-    //    "return response 400 Bad request for deleting client by id" in {
-    //      Given("")
-    //      When("")
-    //      Then("")
-    //    }
-
     "return response 404 Not found for deleting product by id (DELETE '/products/{productId}')" in {
+
       Given("the request for deleting nonexistent product by id")
-      val idUri   = Uri.fromString(s"/products/$nonExistentId").getOrElse(uri"")
+      val idUri   = uriFromString(parametrizedURL(nonExistentId))
       val request = Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = idUri)
 
       When("the request is processed")
@@ -268,5 +275,4 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
       response.status shouldBe Status.NotFound
     }
   }
-
 }

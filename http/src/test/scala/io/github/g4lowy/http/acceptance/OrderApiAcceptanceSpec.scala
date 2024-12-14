@@ -24,8 +24,6 @@ import java.util.UUID
 
 class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
 
-  private val baseURL = uri"/orders"
-
   override protected val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]] = OrderApi.routes
 
   protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
@@ -108,7 +106,6 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
   private val inValidUpdateJson: Json =
     Json.fromJsonObject(JsonObject("status" -> Json.fromString(PatchOrder.Status.Cancelled.toString)))
 
-  // quantity is negative
   private val invalidJson = Json.fromJsonObject(
     JsonObject(
       "customerId" -> Json.fromString(customerId.toString),
@@ -124,10 +121,16 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
     )
   )
 
-  private val nonExistentId = "99999999-9999-9999-9999-2a035d9e16ba"
+  private val baseURL = uri"/orders"
+
+  private val parametrizedURL = (id: String) => s"/orders/$id"
+
+  private val returnedIdFieldName = "value"
 
   "Order API handler" must {
+
     "return response 201 Created for creating order (POST '/orders')" in {
+
       Given("the request with valid data")
       val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
@@ -176,12 +179,12 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdOrderId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for fetching existing order by id")
-      val getByIdUri = Uri.fromString(s"/orders/$createdOrderId").getOrElse(uri"/orders/id")
+      val getByIdUri = uriFromString(parametrizedURL(createdOrderId))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
 
       When("the request is processed")
@@ -206,17 +209,20 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 404 Not found for fetching order by id (GET '/orders/{orderId}')" in {
+
       Given("request with nonexistent id")
-      val id         = nonExistentId
-      val getByIdUri = Uri.fromString(s"/orders/$id").getOrElse(uri"/orders/id")
+      val getByIdUri = uriFromString(parametrizedURL(nonExistentId))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
+
       When("the request is processed")
       val response = handleRequest(request)
+
       Then("the response should be 404 Not found")
       response.status shouldBe Status.NotFound
     }
 
     "return response 204 No content for patching order by id (PUT '/orders/{orderId}')" in {
+
       val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
@@ -224,13 +230,13 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdOrderId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for updating existing order by id with valid body")
 
-      val idUri = Uri.fromString(s"/orders/$createdOrderId").getOrElse(uri"/orders/id")
+      val idUri = uriFromString(parametrizedURL(createdOrderId))
       val patchRequest = Request[RIO[AppEnvironment, *]](method = Method.PATCH, uri = idUri)
         .withEntity(validUpdateJson)
 
@@ -239,12 +245,14 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       Then("the response should be 204 No content")
       patchResponse.status shouldBe Status.NoContent
+
     }
 
     "return response 404 Not found for patching order by id (PUT '/orders/{orderId}')" in {
+
       Given("the request for updating order's status by id with valid body")
 
-      val updateCustomerUri = Uri.fromString(s"/orders/$nonExistentId").getOrElse(uri"")
+      val updateCustomerUri = uriFromString(parametrizedURL(nonExistentId))
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PATCH, uri = updateCustomerUri).withEntity(validUpdateJson)
 
@@ -263,13 +271,13 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       val createdOrderId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
       Given("the request for updating existing order by id with invalid body")
 
-      val idUri = Uri.fromString(s"/orders/$createdOrderId").getOrElse(uri"/orders/id")
+      val idUri = uriFromString(parametrizedURL(createdOrderId))
 
       val correctPatchRequest = Request[RIO[AppEnvironment, *]](method = Method.PATCH, uri = idUri)
         .withEntity(validUpdateJson)

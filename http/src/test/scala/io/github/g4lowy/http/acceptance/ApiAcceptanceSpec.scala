@@ -10,8 +10,8 @@ import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostg
 import io.github.g4lowy.testutils.TestDatabaseConfiguration.postgresLive
 import io.github.g4lowy.testutils.{AppTestConfig, TestDatabaseConfiguration}
 import org.http4s.circe._
-import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
-import org.http4s.{HttpRoutes, Request, Response}
+import org.http4s.implicits.{http4sKleisliResponseSyntaxOptionT, http4sLiteralsSyntax}
+import org.http4s.{HttpRoutes, Request, Response, Uri}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, GivenWhenThen}
@@ -28,6 +28,10 @@ abstract class ApiAcceptanceSpec
   protected val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]]
 
   protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit]
+
+  protected val nonExistentId: String = "99999999-9999-9999-9999-2a035d9e16ba"
+
+  protected val uriFromString: String => Uri = (url: String) => Uri.fromString(url).getOrElse(uri"")
 
   override protected def beforeAll: Unit = runEffect(cleanData.provide(dependencies))
 

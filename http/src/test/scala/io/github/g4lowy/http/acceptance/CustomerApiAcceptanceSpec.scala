@@ -50,12 +50,18 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     )
   )
 
-  private val nonExistentId = "99999999-9999-9999-9999-2a035d9e16ba"
+  private val baseURL = uri"/customers"
+
+  private val parametrizedURL = (id: String) => s"/customers/$id"
+
+  private val returnedIdFieldName = "value"
 
   "Customer API handler" must {
+
     "return response 201 Created for creating customer (POST '/customers')" in {
+
       Given("the request with valid data")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       When("the request is processed")
@@ -65,13 +71,13 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
       Then("the response should be 204 Created")
       response.status shouldBe Status.Created
-      body.asObject.exists(_.contains("value")) shouldBe true
-
+      body.asObject.exists(_.contains(returnedIdFieldName)) shouldBe true
     }
 
     "return response 400 Bad request for creating customer (POST '/customers')" in {
+
       Given("the request with invalid data")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(invalidJson)
 
       When("the request is processed")
@@ -82,8 +88,9 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 200 Ok for fetching customers (GET '/customers')" in {
+
       Given("the request for fetching all customers")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = uri"/customers")
+      val request = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = baseURL)
 
       When("the request is processed")
       val response = handleRequest(request)
@@ -94,19 +101,19 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
 
     "return response 200 Ok for fetching customer by id (GET '/customers/{customerId}')" in {
 
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+      Given("the request for fetching existing customer by id")
+
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
-
-      Given("the request for fetching existing customer by id")
-      val getByIdUri = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"/customers/id")
+      val getByIdUri = uriFromString(parametrizedURL(createdCustomerId))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
 
       When("the request is processed")
@@ -131,39 +138,42 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 404 Not found for fetching customer by id (GET '/customers/{customerId}')" in {
+
       Given("request with nonexistent id")
       val id         = nonExistentId
-      val getByIdUri = Uri.fromString(s"/customers/$id").getOrElse(uri"/customers/id")
+      val getByIdUri = uriFromString(parametrizedURL(id))
       val request    = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
+
       When("the request is processed")
       val response = handleRequest(request)
       Then("the response should be 404 Not found")
+
       response.status shouldBe Status.NotFound
     }
 
     "return response 204 No content for updating customer by id (PUT '/customers/{customerId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+
+      Given("the request for updating existing customer by id")
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
-      Given("the request for updating existing customer by id")
+      val updateCustomerUri = uriFromString(parametrizedURL(createdCustomerId))
 
-      val updateCustomerUri = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"")
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateCustomerUri).withEntity(validUpdateJson)
 
       When("the request is processed")
-
       val updateResponse = handleRequest(updateRequest)
 
-      val getByIdUri        = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"/customers/id")
+      val getByIdUri        = uriFromString(parametrizedURL(createdCustomerId))
       val fetchRequest      = Request[RIO[AppEnvironment, *]](method = Method.GET, uri = getByIdUri)
       val fetchResponse     = handleRequest(fetchRequest)
       val fetchResponseBody = mapResponseBodyToJson(fetchResponse)
@@ -187,20 +197,21 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 400 Bad request for updating customer by id (PUT '/customers/{customerId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+
+      Given("the request for updating existing customer by id with invalid body")
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
-      Given("the request for updating existing customer by id with invalid body")
+      val updateCustomerUri = uriFromString(parametrizedURL(createdCustomerId))
 
-      val updateCustomerUri = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"")
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateCustomerUri).withEntity(invalidJson)
 
@@ -212,9 +223,10 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 404 Not found for updating customer by id (PUT '/customers/{customerId}')" in {
-      Given("the request for updating existing customer by id with invalid body")
 
-      val updateCustomerUri = Uri.fromString(s"/customers/$nonExistentId").getOrElse(uri"")
+      Given("the request for updating existing customer by id with invalid body")
+      val updateCustomerUri = uriFromString(parametrizedURL(nonExistentId))
+
       val updateRequest =
         Request[RIO[AppEnvironment, *]](method = Method.PUT, uri = updateCustomerUri).withEntity(validUpdateJson)
 
@@ -226,22 +238,23 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
     }
 
     "return response 204 No content for deleting customer by id (DELETE '/customers/{customerId}')" in {
-      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = uri"/customers")
+
+      Given("the request for deleting existing customer by id")
+      val createRequest = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
         .withEntity(validJson)
 
       val createResponse = handleRequest(createRequest)
 
       val createdCustomerId =
         mapResponseBodyToJson(createResponse).asObject
-          .flatMap(_.apply("value"))
+          .flatMap(_.apply(returnedIdFieldName))
           .flatMap(_.asString)
           .getOrElse("")
 
-      val getByIdUri = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"/customers/id")
+      val getByIdUri = uriFromString(parametrizedURL(createdCustomerId))
 
-      Given("the request for deleting existing customer by id")
+      val deleteCustomerUri = uriFromString(parametrizedURL(createdCustomerId))
 
-      val deleteCustomerUri = Uri.fromString(s"/customers/$createdCustomerId").getOrElse(uri"")
       val deleteRequest =
         Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = deleteCustomerUri).withEntity(validUpdateJson)
 
@@ -260,15 +273,10 @@ class CustomerApiAcceptanceSpec extends ApiAcceptanceSpec {
       fetchAfterDeleteResponse.status shouldBe Status.NotFound
     }
 
-//    "return response 400 Bad request for deleting customer by id" in {
-//      Given("")
-//      When("")
-//      Then("")
-//    }
-
     "return response 404 Not found for deleting customer by id (DELETE '/customers/{customerId}')" in {
+
       Given("the request for deleting nonexistent customer by id")
-      val deleteCustomerUri = Uri.fromString(s"/customers/$nonExistentId").getOrElse(uri"")
+      val deleteCustomerUri = uriFromString(parametrizedURL(nonExistentId))
       val request           = Request[RIO[AppEnvironment, *]](method = Method.DELETE, uri = deleteCustomerUri)
 
       When("the request is processed")
