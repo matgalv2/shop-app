@@ -13,6 +13,17 @@ paths:
     get:
       operationId: getAllCustomers
       x-jvm-package: customers
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            format: int32
       responses:
         200:
           description: Fetches a list of customers

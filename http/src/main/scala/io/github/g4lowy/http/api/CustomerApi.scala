@@ -1,33 +1,25 @@
 package io.github.g4lowy.http.api
 
-import http.generated.customers.{
-  CreateCustomerResponse,
-  CustomersHandler,
-  CustomersResource,
-  DeleteCustomerResponse,
-  GetAllCustomersResponse,
-  GetCustomerByIdResponse,
-  UpdateCustomerResponse
-}
-import http.generated.definitions.{ CreateCustomer, ErrorResponse, UpdateCustomer }
+import http.generated.customers._
+import http.generated.definitions.{CreateCustomer, ErrorResponse, UpdateCustomer}
 import io.github.g4lowy.customer.domain.model.CustomerId
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
-import io.github.g4lowy.http.api.CustomerApi.Environment
-import io.github.g4lowy.http.service.CustomerService
-import zio.{ RIO, Runtime, URIO, ZIO }
-import io.github.g4lowy.validation.extras._
-import io.github.g4lowy.http.converters.customers._
-import io.github.g4lowy.http.error._
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
+import io.github.g4lowy.http.api.CustomerApi.Environment
+import io.github.g4lowy.http.converters.customers._
+import io.github.g4lowy.http.error._
+import io.github.g4lowy.http.service.CustomerService
+import io.github.g4lowy.validation.extras._
 import org.http4s.HttpRoutes
+import zio.{RIO, Runtime, URIO, ZIO}
 
 import java.util.UUID
 
 class CustomerApi extends CustomersHandler[RIO[AppEnvironment, *]] {
 
-  override def getAllCustomers(respond: GetAllCustomersResponse.type)(): RIO[Environment, GetAllCustomersResponse] =
-    CustomerService.getCustomers
+  override def getAllCustomers(respond: GetAllCustomersResponse.type)(offset: Option[Int], limit: Option[Int]): RIO[AppEnvironment, GetAllCustomersResponse] =
+    CustomerService.getCustomers(offset, limit)
       .map(_.map(_.toAPI))
       .map(_.toVector)
       .map(respond.Ok)

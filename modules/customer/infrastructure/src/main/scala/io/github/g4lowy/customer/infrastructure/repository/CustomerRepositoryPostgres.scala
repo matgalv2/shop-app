@@ -15,6 +15,11 @@ case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends 
     querySchema[CustomerSQL]("Customers")
   }
 
+  private def customersOffsetAndLimit(offset: Int, limit: Int) =
+    quote {
+      querySchema[CustomerSQL]("Customers").drop(lift(offset)).take(lift(limit))
+    }
+
   override def create(client: Customer): UIO[CustomerId] = {
     val result =
       run {
@@ -43,8 +48,8 @@ case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends 
       })
   }
 
-  override def getAll: UIO[List[Customer]] = {
-    val result = run(quote(customers))
+  override def getAll(offset: Index, limit: Index): UIO[List[Customer]] = {
+    val result = run(quote(customersOffsetAndLimit(offset, limit)))
 
     result
       .map(_.map(_.toDomain.validateUnsafe))
