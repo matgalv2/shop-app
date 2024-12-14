@@ -144,7 +144,7 @@ lazy val orderDomain = (project in file("/modules/order/domain"))
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation, productDomain, customerDomain, abstractTypes)
+  .dependsOn(validation, productDomain, customerDomain, abstractTypes, unionTypes)
 
 lazy val orderInfrastructure = (project in file("/modules/order/infrastructure"))
   .settings(name := "order-infrastructure")
