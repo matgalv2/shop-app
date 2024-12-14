@@ -8,7 +8,7 @@ import zio.{IO, UIO}
 trait ProductRepository {
   def getById(productId: ProductId): IO[ProductError.NotFound, Product]
   def getMany(productIds: List[ProductId]): IO[ProductError.NotFound, List[Product]]
-  def getAll: UIO[List[Product]]
+  def getAll(offset: Int, limit: Int): UIO[List[Product]]
   def create(product: Product): UIO[ProductId]
   def update(productId: ProductId, product: Product): IO[ProductError.NotFound, Unit]
   def delete(productId: ProductId): IO[ProductError.NotFound, Unit]

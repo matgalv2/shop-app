@@ -5,8 +5,12 @@ import io.github.g4lowy.product.domain.repository.ProductRepository
 import zio.{URIO, ZIO}
 
 object ProductService {
-  def getProducts: URIO[ProductRepository, List[Product]] =
-    ProductRepository.getAll
+
+  private val DEFAULT_OFFSET = 0
+  private val DEFAULT_LIMIT = 10
+
+  def getProducts(offset: Option[Int], limit: Option[Int]): URIO[ProductRepository, List[Product]] =
+    ProductRepository.getAll(offset.getOrElse(DEFAULT_OFFSET), limit.getOrElse(DEFAULT_LIMIT))
 
   def getMany(ids: List[ProductId]): ZIO[ProductRepository, ProductError.NotFound, List[Product]] =
     ProductRepository.getMany(ids)

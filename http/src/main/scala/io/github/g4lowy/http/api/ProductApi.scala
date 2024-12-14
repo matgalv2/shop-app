@@ -1,26 +1,18 @@
 package io.github.g4lowy.http.api
 
-import http.generated.definitions.{ CreateProduct, ErrorResponse, UpdateProduct }
-import http.generated.products.{
-  CreateProductResponse,
-  DeleteProductResponse,
-  GetAllProductsResponse,
-  GetProductByIdResponse,
-  ProductsHandler,
-  ProductsResource,
-  UpdateProductResponse
-}
+import http.generated.definitions.{CreateProduct, ErrorResponse, UpdateProduct}
+import http.generated.products._
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi.Environment
-import io.github.g4lowy.http.service.ProductService
-import io.github.g4lowy.product.domain.repository.ProductRepository
-import zio.{ RIO, Runtime, ZIO }
 import io.github.g4lowy.http.converters.products._
 import io.github.g4lowy.http.error._
+import io.github.g4lowy.http.service.ProductService
 import io.github.g4lowy.product.domain.model.ProductId
+import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import org.http4s.HttpRoutes
+import zio.{RIO, Runtime, ZIO}
 
 import java.util.UUID
 
@@ -35,9 +27,10 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
       .flatMap(ProductService.createProduct)
       .map(productId => respond.Created(productId.toAPI))
       .merge
-
-  override def getAllProducts(respond: GetAllProductsResponse.type)(): RIO[Environment, GetAllProductsResponse] =
-    ProductService.getProducts
+  override def getAllProducts(
+    respond: GetAllProductsResponse.type
+  )(offset: Option[Int], limit: Option[Int]): RIO[AppEnvironment, GetAllProductsResponse] =
+    ProductService.getProducts(offset, limit)
       .map(_.map(_.toAPI))
       .map(_.toVector)
       .map(respond.Ok)
@@ -72,6 +65,7 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
       )
       .as(respond.NoContent)
       .merge
+
 }
 object ProductApi {
   type Environment = ProductRepository

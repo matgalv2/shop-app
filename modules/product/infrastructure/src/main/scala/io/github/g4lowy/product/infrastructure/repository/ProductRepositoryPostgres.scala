@@ -19,6 +19,11 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
     querySchema[ProductSQL]("Products")
   }
 
+  private def productsOffsetAndLimit(offset: Int, limit: Int) =
+    quote {
+      querySchema[ProductSQL]("Products").drop(lift(offset)).take(lift(limit))
+    }
+
   override def getById(productId: ProductId): IO[ProductError.NotFound, model.Product] = {
     val result =
       run {
@@ -34,8 +39,8 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
       })
   }
 
-  override def getAll: UIO[List[model.Product]] = {
-    val result = run(quote(products))
+  override def getAll(offset: Index, limit: Index): UIO[List[Product]] = {
+    val result = run(quote(productsOffsetAndLimit(offset, limit)))
 
     result
       .map(_.map(_.toDomain.validateUnsafe))

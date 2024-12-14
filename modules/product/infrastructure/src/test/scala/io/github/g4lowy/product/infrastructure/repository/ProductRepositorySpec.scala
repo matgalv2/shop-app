@@ -19,6 +19,9 @@ import java.util.UUID
 
 object ProductRepositorySpec extends ZIOSpecDefault {
 
+  private val DEFAULT_OFFSET = 0
+  private val DEFAULT_LIMIT  = 10
+
   override def spec: Spec[TestEnvironment with Scope, Any] = {
     Spec.multiple {
       Chunk(
@@ -34,7 +37,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
           for {
             validated <- ZIO.fromValidation(validation)
             _         <- ZIO.foreachDiscard(validated)(ProductRepository.create)
-            actual    <- ProductRepository.getAll
+            actual    <- ProductRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
           } yield assertTrue(
             actual.size == 2,
             actual.map(_.productId.value.toString).contains(productId1),
@@ -44,10 +47,10 @@ object ProductRepositorySpec extends ZIOSpecDefault {
         test("create product") {
           val product = makeProduct(UUID.randomUUID().toString)
           for {
-            beforeAdd <- ProductRepository.getAll.map(_.size)
+            beforeAdd <- ProductRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT).map(_.size)
             validated <- ZIO.fromNotValidated(product)
             _         <- ProductRepository.create(validated)
-            afterAdd  <- ProductRepository.getAll
+            afterAdd  <- ProductRepository.getAll(DEFAULT_OFFSET, DEFAULT_LIMIT)
           } yield assertTrue(
             beforeAdd == 0,
             afterAdd.size == 1,
