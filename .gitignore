@@ -16,3 +16,4 @@
 /target/scala-2.13/classes/
 /.bsp/
 /.idea
+/modules/common/testUtils/src/main/resources/*.conf
