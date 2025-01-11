@@ -14,6 +14,7 @@ object OrderStatus {
   final case object InProgress extends OrderStatus("IN_PROGRESS")
   final case object Sent extends OrderStatus("SENT")
   final case object Delivered extends OrderStatus("DELIVERED")
+  final case object Archived extends OrderStatus("ARCHIVED")
 
-  private val values = List(Created, Cancelled, Paid, InProgress, Sent, Delivered)
+  private val values = List(Created, Cancelled, Paid, InProgress, Sent, Delivered, Archived)
 }

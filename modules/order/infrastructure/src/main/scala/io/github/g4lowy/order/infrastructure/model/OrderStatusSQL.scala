@@ -12,6 +12,7 @@ sealed abstract class OrderStatusSQL(val value: String) extends EnumSQL {
     case OrderStatusSQL.InProgress => OrderStatus.InProgress
     case OrderStatusSQL.Sent       => OrderStatus.Sent
     case OrderStatusSQL.Delivered  => OrderStatus.Delivered
+    case OrderStatusSQL.Archived   => OrderStatus.Delivered
   }
 }
 
@@ -23,8 +24,10 @@ object OrderStatusSQL extends EnumDecoder[OrderStatusSQL] {
   final case object InProgress extends OrderStatusSQL("IN_PROGRESS")
   final case object Sent extends OrderStatusSQL("SENT")
   final case object Delivered extends OrderStatusSQL("DELIVERED")
+  final case object Archived extends OrderStatusSQL("ARCHIVED")
 
-  override protected val values: List[OrderStatusSQL] = List(Created, Cancelled, Paid, InProgress, Sent, Delivered)
+  override protected val values: List[OrderStatusSQL] =
+    List(Created, Cancelled, Paid, InProgress, Sent, Delivered, Archived)
 
   def fromDomain(status: OrderStatus): OrderStatusSQL = status match {
     case OrderStatus.Created    => OrderStatusSQL.Created
@@ -33,5 +36,6 @@ object OrderStatusSQL extends EnumDecoder[OrderStatusSQL] {
     case OrderStatus.InProgress => OrderStatusSQL.InProgress
     case OrderStatus.Sent       => OrderStatusSQL.Sent
     case OrderStatus.Delivered  => OrderStatusSQL.Delivered
+    case OrderStatus.Archived   => OrderStatusSQL.Archived
   }
 }

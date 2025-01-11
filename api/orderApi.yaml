@@ -210,6 +210,7 @@ components:
             - IN_PROGRESS
             - SENT
             - DELIVERED
+            - ARCHIVED
         details:
           type: array
           items:
@@ -281,6 +282,7 @@ components:
             - IN_PROGRESS
             - SENT
             - DELIVERED
+            - ARCHIVED
       required:
         - status
 

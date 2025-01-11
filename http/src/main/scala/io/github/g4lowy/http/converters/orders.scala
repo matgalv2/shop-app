@@ -82,6 +82,7 @@ object orders {
         case PatchOrder.Status.members.InProgress => OrderStatus.InProgress
         case PatchOrder.Status.members.Sent       => OrderStatus.Sent
         case PatchOrder.Status.members.Delivered  => OrderStatus.Delivered
+        case PatchOrder.Status.members.Archived   => OrderStatus.Archived
       }
   }
 
@@ -164,6 +165,7 @@ object orders {
         case OrderStatus.InProgress => GetOrder.Status.InProgress
         case OrderStatus.Sent       => GetOrder.Status.Sent
         case OrderStatus.Delivered  => GetOrder.Status.Delivered
+        case OrderStatus.Archived   => GetOrder.Status.Archived
       }
   }
 
