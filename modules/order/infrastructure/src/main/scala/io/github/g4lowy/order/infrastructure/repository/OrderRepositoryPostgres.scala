@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.repository
 
-import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
+import io.getquill.{CamelCase, Query}
 import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
@@ -218,6 +218,33 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       case Right(_)         => ZIO.unit
     }
   }
+
+  override def archiveDeliveredOrders: UIO[Unit] =
+    run {
+      quote {
+        sql"""
+              WITH latest_delivered_orders AS (
+                WITH last_orders_modifications AS (
+                    SELECT
+                        id,
+                        orderId,
+                        modifiedAt,
+                        newValue,
+                        ROW_NUMBER() OVER (PARTITION BY orderId ORDER BY id DESC, modifiedAt DESC) AS rowNumber
+                    FROM orders_aud
+                )
+                SELECT
+                    orderId,
+                    modifiedAt
+                FROM last_orders_modifications
+                WHERE rowNumber = 1 AND newValue @> '{ "status": "DELIVERED" }' AND modifiedAt <= NOW() - INTERVAL '3 months'
+              )
+              UPDATE orders
+              SET status = 'ARCHIVED'
+              WHERE orderId IN (SELECT orderId FROM latest_delivered_orders);
+           """.as[Query[Int]]
+      }
+    }.orDie.unit
 
   private def getOrDieWithMessage[A](option: Option[A], message: String): ZIO[Any, Nothing, A] =
     option match {
