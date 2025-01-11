@@ -1,4 +1,4 @@
-CREATE TABLE Products(
+CREATE TABLE products(
     productId   UUID    NOT NULL,
     name        TEXT    NOT NULL,
     price       NUMERIC NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE Products(
     PRIMARY KEY (productId)
 );
 
-ALTER TABLE Products ADD CONSTRAINT price_check CHECK ( price > 0.0 )
+ALTER TABLE products ADD CONSTRAINT price_check CHECK ( price > 0.0 )

@@ -147,7 +147,7 @@ object CustomerRepositorySpec extends ZIOSpecDefault {
   private def cleanTable =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
-        quill.run(quote(querySchema[CustomerSQL]("Customers").delete))
+        quill.run(quote(querySchema[CustomerSQL]("customers").delete))
       }
       .unit
       .orDie

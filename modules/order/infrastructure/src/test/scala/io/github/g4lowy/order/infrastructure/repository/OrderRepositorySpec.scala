@@ -180,9 +180,9 @@ object OrderRepositorySpec extends ZIOSpecDefault {
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
         import quill._
         for {
-          _ <- quill.run(quote(querySchema[OrderDetailSQL]("OrdersDetails").delete))
-          _ <- quill.run(quote(querySchema[OrderSQL]("Orders").delete))
-          _ <- quill.run(quote(querySchema[AddressSQL]("Addresses").delete))
+          _ <- quill.run(quote(querySchema[OrderDetailSQL]("orders_details").delete))
+          _ <- quill.run(quote(querySchema[OrderSQL]("orders").delete))
+          _ <- quill.run(quote(querySchema[AddressSQL]("addresses").delete))
         } yield ()
       }
       .unit

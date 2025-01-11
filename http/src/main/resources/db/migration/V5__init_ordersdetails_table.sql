@@ -1,4 +1,4 @@
-CREATE TABLE OrdersDetails(
+CREATE TABLE orders_details(
     orderId         UUID,
     productId       UUID,
     quantity        INT         NOT NULL,
@@ -6,9 +6,9 @@ CREATE TABLE OrdersDetails(
 
 
     PRIMARY KEY (orderId, productId),
-    FOREIGN KEY (orderId) REFERENCES Orders(orderId),
-    FOREIGN KEY (productId) REFERENCES Products(productId),
+    FOREIGN KEY (orderId)   REFERENCES orders(orderId),
+    FOREIGN KEY (productId) REFERENCES products(productId),
 
-    CONSTRAINT quantity_check CHECK ( quantity >= 0 ),
-    CONSTRAINT sum_check CHECK ( pricePerUnit >= 0.0 )
+    CONSTRAINT quantity_check   CHECK ( quantity >= 0 ),
+    CONSTRAINT sum_check        CHECK ( pricePerUnit >= 0.0 )
 )

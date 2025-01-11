@@ -3,7 +3,7 @@ package io.github.g4lowy.order.infrastructure.repository
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.abstracttype.Id.UUIDOps
-import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderStatus}
+import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
@@ -20,23 +20,23 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
 
   private def ordersOffsetAndLimit(offset: Int, limit: Int) =
     quote {
-      querySchema[OrderSQL]("Orders").drop(lift(offset)).take(lift(limit))
+      querySchema[OrderSQL]("orders").drop(lift(offset)).take(lift(limit))
     }
 
   private val orders = quote {
-    querySchema[OrderSQL]("Orders")
+    querySchema[OrderSQL]("orders")
   }
 
   private val addresses = quote {
-    querySchema[AddressSQL]("Addresses")
+    querySchema[AddressSQL]("addresses")
   }
 
   private val ordersDetails = quote {
-    querySchema[OrderDetailSQL]("OrdersDetails")
+    querySchema[OrderDetailSQL]("orders_details")
   }
 
   private val products = quote {
-    querySchema[ProductSQL]("Products")
+    querySchema[ProductSQL]("products")
   }
 
   private implicit val orderStatusEncoder: Encoder[OrderStatusSQL] = encoder[OrderStatusSQL](

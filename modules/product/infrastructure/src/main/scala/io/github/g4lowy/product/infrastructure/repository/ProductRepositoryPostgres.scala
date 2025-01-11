@@ -16,12 +16,12 @@ case class ProductRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends P
   import quill._
 
   private val products = quote {
-    querySchema[ProductSQL]("Products")
+    querySchema[ProductSQL]("products")
   }
 
   private def productsOffsetAndLimit(offset: Int, limit: Int) =
     quote {
-      querySchema[ProductSQL]("Products").drop(lift(offset)).take(lift(limit))
+      querySchema[ProductSQL]("products").drop(lift(offset)).take(lift(limit))
     }
 
   override def getById(productId: ProductId): IO[ProductError.NotFound, model.Product] = {

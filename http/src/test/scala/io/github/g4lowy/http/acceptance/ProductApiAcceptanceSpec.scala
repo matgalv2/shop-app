@@ -18,7 +18,7 @@ class ProductApiAcceptanceSpec extends ApiAcceptanceSpec {
   override protected def cleanData: URIO[Quill.Postgres[CamelCase], Unit] =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
-        quill.run(quote(querySchema[ProductSQL]("Products").delete))
+        quill.run(quote(querySchema[ProductSQL]("products").delete))
       }
       .unit
       .orDie

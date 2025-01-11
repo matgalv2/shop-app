@@ -17,7 +17,7 @@ case class CustomerRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends 
 
   private def customersOffsetAndLimit(offset: Int, limit: Int) =
     quote {
-      querySchema[CustomerSQL]("Customers").drop(lift(offset)).take(lift(limit))
+      querySchema[CustomerSQL]("customers").drop(lift(offset)).take(lift(limit))
     }
 
   override def create(client: Customer): UIO[CustomerId] = {

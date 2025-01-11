@@ -123,7 +123,7 @@ object ProductRepositorySpec extends ZIOSpecDefault {
   private def cleanTable =
     ZIO
       .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
-        quill.run(quote(querySchema[ProductSQL]("Products").delete))
+        quill.run(quote(querySchema[ProductSQL]("products").delete))
       }
       .unit
       .orDie
