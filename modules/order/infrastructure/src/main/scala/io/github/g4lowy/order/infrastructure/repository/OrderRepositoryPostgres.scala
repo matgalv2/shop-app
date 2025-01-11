@@ -1,7 +1,7 @@
 package io.github.g4lowy.order.infrastructure.repository
 
 import io.getquill.jdbczio.Quill
-import io.getquill.{CamelCase, Query}
+import io.getquill.{Action, CamelCase}
 import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
@@ -219,7 +219,7 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
     }
   }
 
-  override def archiveDeliveredOrders: UIO[Unit] =
+  override def archiveDeliveredOrders: UIO[Long] =
     run {
       quote {
         sql"""
@@ -242,9 +242,9 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
               UPDATE orders
               SET status = 'ARCHIVED'
               WHERE orderId IN (SELECT orderId FROM latest_delivered_orders);
-           """.as[Query[Int]]
+           """.as[Action[Long]]
       }
-    }.orDie.unit
+    }.map(_.self).orDie
 
   private def getOrDieWithMessage[A](option: Option[A], message: String): ZIO[Any, Nothing, A] =
     option match {

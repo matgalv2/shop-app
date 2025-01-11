@@ -14,5 +14,5 @@ trait OrderRepository {
     orderId: OrderId,
     orderStatus: OrderStatus
   ): IO[Union2[OrderError.NotFound, OrderError.InvalidStatus], Unit]
-  def archiveDeliveredOrders: UIO[Unit]
+  def archiveDeliveredOrders: UIO[Long]
 }
