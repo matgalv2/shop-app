@@ -1,5 +1,5 @@
 CREATE TABLE customers (
-    customerId    UUID        PRIMARY KEY,
+    customerId  UUID        PRIMARY KEY,
     firstName   VARCHAR(64) NOT NULL,
     lastName    VARCHAR(64) NOT NULL,
     birthDate   DATE,
