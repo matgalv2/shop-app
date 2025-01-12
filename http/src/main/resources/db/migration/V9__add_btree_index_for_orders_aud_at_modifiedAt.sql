@@ -1,0 +1,1 @@
+CREATE INDEX modifiedAt_orders_aud_index ON orders_aud USING BTREE(orderId);
