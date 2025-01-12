@@ -2,6 +2,7 @@ package io.github.g4lowy.http.api
 
 import http.generated.definitions.{CreateProduct, ErrorResponse, UpdateProduct}
 import http.generated.products._
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi.Environment
@@ -39,7 +40,7 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
     respond: GetProductByIdResponse.type
   )(productId: UUID): RIO[Environment, GetProductByIdResponse] =
     ProductService
-      .getProductById(ProductId.fromUUID(productId))
+      .getProductById(productId.toId)
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _.toAPI)
       .map(respond.Ok)
       .merge
@@ -48,7 +49,7 @@ class ProductApi extends ProductsHandler[RIO[AppEnvironment, *]] {
     respond: DeleteProductResponse.type
   )(productId: UUID): RIO[Environment, DeleteProductResponse] =
     ProductService
-      .deleteProduct(ProductId.fromUUID(productId))
+      .deleteProduct(productId.toId)
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _ => respond.NoContent)
       .merge
 
