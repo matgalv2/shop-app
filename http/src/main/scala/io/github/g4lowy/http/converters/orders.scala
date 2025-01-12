@@ -2,8 +2,6 @@ package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{CreateAddress, CreateOrder, CreateOrderDetail, GetAddress, GetOrder, GetOrderDetail, PatchOrder}
 import io.github.g4lowy.abstracttype.Id.UUIDOps
-import io.github.g4lowy.http.dto.OrderDto
-import io.github.g4lowy.http.dto.OrderDto.{AddressDto, OrderDetailDto, PaymentTypeDto, ShipmentTypeDto}
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.model.address._
 import io.github.g4lowy.product.domain.model.Product
@@ -13,14 +11,8 @@ import java.time.LocalDateTime
 
 object orders {
 
-  // API -> DTO
-
-  implicit class CreateOrderDetailOps(private val createOrderDetail: CreateOrderDetail) extends AnyVal {
-    def toDTO: OrderDto.OrderDetailDto =
-      createOrderDetail
-        .transformInto[OrderDto.OrderDetailDto]
-  }
-
+  /*
+  // API -> domain
   implicit class CreateAddressOps(private val createAddress: CreateAddress) extends AnyVal {
     def toDTO: OrderDto.AddressDto =
       createAddress
@@ -56,12 +48,13 @@ object orders {
         .withFieldComputed(_.shipmentAddress, _.shipmentAddress.map(_.toDTO))
         .transform
   }
+   */
 
   // DTO -> domain
 
-  implicit class AddressDtoOps(private val addressDto: AddressDto) extends AnyVal {
+  implicit class CreateAddressOps(private val createAddress: CreateAddress) extends AnyVal {
     def toDomain: Address.Unvalidated =
-      addressDto
+      createAddress
         .into[Address.Unvalidated]
         .withFieldConst(_.addressId, AddressId.generate)
         .withFieldComputed(_.country, x => Country.Unvalidated(x.country))
@@ -86,27 +79,27 @@ object orders {
       }
   }
 
-  implicit class PaymentTypeDtoOps(private val paymentTypeDto: PaymentTypeDto) extends AnyVal {
+  implicit class CreatePaymentTypeOps(private val createPaymentType: CreateOrder.PaymentType) extends AnyVal {
     def toDomain: PaymentType =
-      paymentTypeDto match {
-        case PaymentTypeDto.BankTransfer => PaymentType.BankTransfer
-        case PaymentTypeDto.Card         => PaymentType.Card
-        case PaymentTypeDto.OnDelivery   => PaymentType.OnDelivery
+      createPaymentType match {
+        case CreateOrder.PaymentType.BankTransfer => PaymentType.BankTransfer
+        case CreateOrder.PaymentType.Card         => PaymentType.Card
+        case CreateOrder.PaymentType.OnDelivery   => PaymentType.OnDelivery
       }
   }
 
-  implicit class ShipmentTypeDtoOps(private val shipmentTypeDto: ShipmentTypeDto) extends AnyVal {
+  implicit class CreateShipmentTypeDto(private val createShipmentType: CreateOrder.ShipmentType) extends AnyVal {
     def toDomain: ShipmentType =
-      shipmentTypeDto match {
-        case ShipmentTypeDto.Courier => ShipmentType.Courier
-        case ShipmentTypeDto.Box     => ShipmentType.Box
-        case ShipmentTypeDto.OnPlace => ShipmentType.OnPlace
+      createShipmentType match {
+        case CreateOrder.ShipmentType.Courier => ShipmentType.Courier
+        case CreateOrder.ShipmentType.Box     => ShipmentType.Box
+        case CreateOrder.ShipmentType.OnPlace => ShipmentType.OnPlace
       }
   }
 
-  implicit class OrderDetailDtoOps(private val orderDetailDto: OrderDetailDto) extends AnyVal {
+  implicit class CreateOrderDetailOps(private val createOrderDetail: CreateOrderDetail) extends AnyVal {
     def toDomain(orderId: OrderId, product: Product): OrderDetail.Unvalidated =
-      orderDetailDto
+      createOrderDetail
         .into[OrderDetail.Unvalidated]
         .withFieldConst(_.orderId, orderId)
         .withFieldComputed(_.productId, _.productId.toId)
@@ -116,9 +109,9 @@ object orders {
 
   }
 
-  implicit class OrderDtoOps(private val orderDto: OrderDto) extends AnyVal {
+  implicit class CreateOrderOps(private val createOrder: CreateOrder) extends AnyVal {
     def toDomain(orderId: OrderId, details: List[OrderDetail.Unvalidated]): Order.Unvalidated =
-      orderDto
+      createOrder
         .into[Order.Unvalidated]
         .withFieldConst(_.orderId, orderId)
         .withFieldComputed(_.customerId, _.customerId.toId)
