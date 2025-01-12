@@ -7,7 +7,7 @@ import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.OrderApi.Environment
-import io.github.g4lowy.http.converters.orders.{CreateOrderOps, OrderIdOps, OrderOps, PatchOrderStatusOps}
+import io.github.g4lowy.http.converters.orders.{OrderIdOps, OrderOps, PatchOrderStatusOps}
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.http.service.OrderService
 import io.github.g4lowy.order.domain.model.{OrderError, OrderId}
@@ -24,7 +24,7 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
     respond: CreateOrderResponse.type
   )(body: CreateOrder): RIO[Environment, CreateOrderResponse] =
     OrderService
-      .createOrder(body.toDTO)
+      .createOrder(body)
       .mapBoth(
         {
           case Union3.First(validationFailure) => respond.BadRequest(ErrorResponse.single(validationFailure.toMessage))
