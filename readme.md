@@ -45,6 +45,8 @@ All APIs are described here:
 * Database migrations - to ensure application works with latest version of database Flyway controls database migrations.
 * DSL - to simplify work with database Quill provides QDSL for expressing queries in Scala.
 * Queries implementations - due to fact that quill queries return effects that can fail with SQLError all effects should die with DatabaseCriticalFailure
+* Audit table - to allow monitoring changes in orders table audit table has been utilized. Any change in orders table triggers trigger which saves modification in orders_aud table.
+* Indexes - due to the fact that sooner or later orders_aud will become large in size hash and btree indexes were added to simplify queries using this table
 
 ### 3. Data transformation
 * Mappers - Chimney library was utilized for transforming data types (Domain <-> DTO)
@@ -56,5 +58,5 @@ All APIs are described here:
 ### 5. Data flow
 * To allow fetching reasonable number of some type of data all repositories supports fetching with offset and limit.
 
-## Possible future extensions
-* Adding contact info to order
+### 6. Automation
+* Cyclic jobs - side tasks that must be done in specified intervals like archiving delivered orders after 3 months
