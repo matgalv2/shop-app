@@ -1,14 +1,14 @@
 package io.github.g4lowy.http.service
 
+import http.generated.definitions.CreateOrder
 import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.customer.domain.model.{CustomerError, CustomerId}
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.http.ValidationFailure
-import io.github.g4lowy.http.converters.orders.{OrderDetailDtoOps, OrderDtoOps}
-import io.github.g4lowy.http.dto.OrderDto
+import io.github.g4lowy.http.converters.orders.{CreateOrderDetailOps, CreateOrderOps}
 import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderStatus}
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.product.domain.model.{ProductError, ProductId}
+import io.github.g4lowy.product.domain.model.ProductError
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.{Union2, Union3}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
@@ -29,20 +29,20 @@ object OrderService {
     OrderRepository.getById(domainId)
   }
 
-  def createOrder(orderDto: OrderDto): ZIO[
+  def createOrder(createOrder: CreateOrder): ZIO[
     OrderRepository & CustomerRepository & ProductRepository,
     Union3[ValidationFailure, CustomerError.NotFound, OrderError.ProductsNotFound],
     OrderId
   ] = {
-    val productIds = orderDto.orderDetails.map(_.productId.toId)
+    val productIds = createOrder.details.map(_.productId.toId).toList
     for {
       productsAndDetailDTOs <- ProductService
-        .getMany(productIds.map(id => ProductId.apply(id.value)).toList)
+        .getMany(productIds)
         .flatMap { foundProducts =>
-          ZIO.foreach(orderDto.orderDetails) { detail =>
+          ZIO.foreach(createOrder.details) { detail =>
             foundProducts.find(_.productId.value == detail.productId) match {
               case Some(product) => ZIO.succeed(detail -> product)
-              case None          => ZIO.dieMessage("There was an error grouping products by id")
+              case None          => ZIO.dieMessage("There was an error while fetching products by id")
             }
           }
         }
@@ -50,12 +50,12 @@ object OrderService {
           OrderError.ProductsNotFound(id, ids)
         }
         .mapError(Union3.Third.apply)
-      _ <- CustomerRepository.getById(CustomerId.fromUUID(orderDto.customerId)).mapError(Union3.Second.apply)
+      _ <- CustomerRepository.getById(CustomerId.fromUUID(createOrder.customerId)).mapError(Union3.Second.apply)
       orderId = OrderId.generate
       orderDetails = productsAndDetailDTOs.map { case (detailDto, product) =>
         detailDto.toDomain(orderId, product)
       }.toList
-      order <- ZIO.fromNotValidated(orderDto.toDomain(orderId, orderDetails)).mapError(Union3.First.apply)
+      order <- ZIO.fromNotValidated(createOrder.toDomain(orderId, orderDetails)).mapError(Union3.First.apply)
       id    <- OrderRepository.create(order).mapError(Union3.Third.apply)
     } yield id
   }
