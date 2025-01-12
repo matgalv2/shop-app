@@ -1,7 +1,8 @@
 package io.github.g4lowy.http.api
 
 import http.generated.customers._
-import http.generated.definitions.{CreateCustomer, ErrorResponse, UpdateCustomer}
+import http.generated.definitions.{ CreateCustomer, ErrorResponse, UpdateCustomer }
+import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.customer.domain.model.CustomerId
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage._
@@ -12,14 +13,17 @@ import io.github.g4lowy.http.error._
 import io.github.g4lowy.http.service.CustomerService
 import io.github.g4lowy.validation.extras._
 import org.http4s.HttpRoutes
-import zio.{RIO, Runtime, URIO, ZIO}
+import zio.{ RIO, Runtime, URIO, ZIO }
 
 import java.util.UUID
 
 class CustomerApi extends CustomersHandler[RIO[AppEnvironment, *]] {
 
-  override def getAllCustomers(respond: GetAllCustomersResponse.type)(offset: Option[Int], limit: Option[Int]): RIO[AppEnvironment, GetAllCustomersResponse] =
-    CustomerService.getCustomers(offset, limit)
+  override def getAllCustomers(
+    respond: GetAllCustomersResponse.type
+  )(offset: Option[Int], limit: Option[Int]): RIO[AppEnvironment, GetAllCustomersResponse] =
+    CustomerService
+      .getCustomers(offset, limit)
       .map(_.map(_.toAPI))
       .map(_.toVector)
       .map(respond.Ok)
@@ -28,7 +32,7 @@ class CustomerApi extends CustomersHandler[RIO[AppEnvironment, *]] {
     respond: GetCustomerByIdResponse.type
   )(customerId: UUID): RIO[Environment, GetCustomerByIdResponse] =
     CustomerService
-      .getCustomerById(CustomerId.fromUUID(customerId))
+      .getCustomerById(customerId.toId)
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _.toAPI)
       .map(respond.Ok)
       .merge
@@ -61,7 +65,7 @@ class CustomerApi extends CustomersHandler[RIO[AppEnvironment, *]] {
     respond: DeleteCustomerResponse.type
   )(customerId: UUID): RIO[Environment, DeleteCustomerResponse] =
     CustomerService
-      .deleteCustomer(CustomerId.fromUUID(customerId))
+      .deleteCustomer(customerId.toId)
       .mapBoth(error => respond.NotFound(ErrorResponse.single(error.toMessage)), _ => respond.NoContent)
       .merge
 
