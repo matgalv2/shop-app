@@ -105,6 +105,7 @@ lazy val unionTypes = (project in file("/modules/common/unionTypes"))
 
 lazy val abstractTypes = (project in file("/modules/common/abstractTypes"))
   .settings(name := "abstract-types")
+  .dependsOn(validation)
 
 lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(name := "customer-domain")
