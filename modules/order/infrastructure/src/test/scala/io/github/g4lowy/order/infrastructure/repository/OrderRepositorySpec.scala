@@ -164,6 +164,10 @@ object OrderRepositorySpec extends ZIOSpecDefault {
             fetchedClient <- OrderRepository.updateStatus(id, OrderStatus.Cancelled).exit
           } yield assertTrue(fetchedClient.isFailure)
         }
+        // TODO: add tests for archiving orders
+        /*
+          test("archive orders should succeed") {}
+         */
       )
     } @@ sequential @@ cleanTableBeforeAll @@ cleanTableAfterEach
   }.provide(
@@ -191,6 +195,42 @@ object OrderRepositorySpec extends ZIOSpecDefault {
   private def cleanTableAfterEach = TestAspect.after(cleanTable)
 
   private def cleanTableBeforeAll = TestAspect.beforeAll(cleanTable)
+
+  /* TODO:
+  private def prepareOrderToArchive(orderId: UUID) =
+    ZIO
+      .serviceWithZIO[Quill.Postgres[CamelCase]] { quill =>
+        import quill._
+
+        val customerId = UUID.randomUUID().toString
+        val orderId    = OrderId.fromUUID(UUID.randomUUID())
+        val addressId  = UUID.randomUUID().toString
+
+        val unvalidatedOrder = Order.Unvalidated(
+          orderId         = orderId,
+          customerId      = customerId,
+          details         = Nil,
+          paymentType     = PaymentType.Card,
+          paymentAddress  = ,
+          shipmentType    = ???,
+          shipmentAddress = ???,
+          orderStatus     = ???,
+          createdAt       = ???
+        )
+
+        for {
+          customer <- ZIO.fromNotValidated(makeCustomer(customerId))
+          _        <- CustomerRepository.create(customer)
+          _ <-
+            run(sql"""
+              INSERT INTO addresses (addressId, country, city, street, zipCode, building, apartment)
+              VALUES ($addressId, 'Country', 'City', 'Street', '80-808', '123', '12e');
+             """)
+          order <- ZIO.fromNotValidated()
+        } yield ()
+
+      }
+   */
 
   private def makeProduct(
     id: String,
