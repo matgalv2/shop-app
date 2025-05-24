@@ -4,7 +4,7 @@ import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPos
 import io.github.g4lowy.http.cyclicjobs.OrderJobs
 import io.github.g4lowy.http.database.DatabaseConfiguration
 import io.github.g4lowy.http.database.DatabaseConfiguration.{postgresLive, quillDataSource}
-import io.github.g4lowy.order.infrastructure.repository.OrderRepositoryPostgres
+import io.github.g4lowy.order.infrastructure.database.repository.OrderRepositoryPostgres
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import zio.{Scope, ZIO, ZIOAppArgs, ZIOAppDefault}
 

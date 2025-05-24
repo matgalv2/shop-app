@@ -1,11 +1,11 @@
-package io.github.g4lowy.order.infrastructure.repository
+package io.github.g4lowy.order.infrastructure.database.repository
 
 import io.getquill.jdbczio.Quill
 import io.getquill.{Action, CamelCase}
 import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
-import io.github.g4lowy.order.infrastructure.model._
+import io.github.g4lowy.order.infrastructure.database.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import io.github.g4lowy.union.types.Union2
 import org.postgresql.util.PGobject

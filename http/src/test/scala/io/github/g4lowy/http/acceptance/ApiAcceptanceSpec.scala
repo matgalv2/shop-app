@@ -5,7 +5,7 @@ import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPostgres
 import io.github.g4lowy.http.AppEnvironment
-import io.github.g4lowy.order.infrastructure.repository.OrderRepositoryPostgres
+import io.github.g4lowy.order.infrastructure.database.repository.OrderRepositoryPostgres
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import io.github.g4lowy.testutils.TestDatabaseConfiguration.postgresLive
 import io.github.g4lowy.testutils.{AppTestConfig, TestDatabaseConfiguration}

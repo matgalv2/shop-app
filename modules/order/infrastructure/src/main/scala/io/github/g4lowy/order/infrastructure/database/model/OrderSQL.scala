@@ -1,4 +1,4 @@
-package io.github.g4lowy.order.infrastructure.model
+package io.github.g4lowy.order.infrastructure.database.model
 
 import io.getquill.Embedded
 import io.github.g4lowy.abstracttype.Id._

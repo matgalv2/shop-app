@@ -1,4 +1,4 @@
-package io.github.g4lowy.order.infrastructure.model
+package io.github.g4lowy.order.infrastructure.database.model
 
 import io.github.g4lowy.abstracttype.Id._
 import io.github.g4lowy.order.domain.model.{OrderDetail, OrderId}

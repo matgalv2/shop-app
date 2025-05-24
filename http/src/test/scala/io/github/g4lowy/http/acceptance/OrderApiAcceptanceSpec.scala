@@ -9,7 +9,7 @@ import io.github.g4lowy.customer.domain.model._
 import io.github.g4lowy.customer.infrastructure.model.CustomerSQL
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.OrderApi
-import io.github.g4lowy.order.infrastructure.model.{AddressSQL, OrderDetailSQL, OrderSQL}
+import io.github.g4lowy.order.infrastructure.database.model.{AddressSQL, OrderDetailSQL, OrderSQL}
 import io.github.g4lowy.product.domain.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
 import io.github.g4lowy.testutils.validation.ValidationOps
