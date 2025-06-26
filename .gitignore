@@ -12,3 +12,4 @@
 
 # Targets from modules
 /modules/*/*/target/
+/modules/*/target/

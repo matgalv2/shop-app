@@ -7,11 +7,11 @@ object OrderJobs {
 
   def archiveOrdersOnceADay: ZIO[OrderRepository, Nothing, Unit] = {
 
-    val schedule = Schedule.fixed(1.day)
+    val interval = Schedule.fixed(1.day)
 
     OrderRepository.archiveDeliveredOrders
       .tap(ordersNumber => ZIO.log(s"Archived $ordersNumber orders"))
-      .repeat(schedule)
+      .repeat(interval)
       .unit
   }
 }
