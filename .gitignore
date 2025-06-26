@@ -11,10 +11,4 @@
 /modules/common/testUtils/src/main/resources/*.conf
 
 # Targets from modules
-/modules/*/domain/target/
-/modules/*/infrastructure/target/
-/modules/common/unionTypes/target/
-/modules/common/testUtils/target/
-/modules/common/abstractTypes/target/
-/modules/common/validation/target/
-/modules/common/error/target/
+/modules/*/*/target/
