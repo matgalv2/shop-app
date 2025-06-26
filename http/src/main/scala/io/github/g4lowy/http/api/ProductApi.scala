@@ -8,7 +8,7 @@ import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.ProductApi.Environment
 import io.github.g4lowy.http.converters.products._
 import io.github.g4lowy.http.error._
-import io.github.g4lowy.http.service.ProductService
+import io.github.g4lowy.product.application.ProductService
 import io.github.g4lowy.product.domain.model.ProductId
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.validation.extras.ZIOValidationOps

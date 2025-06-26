@@ -1,8 +1,9 @@
 package io.github.g4lowy.http.api
 
 import http.generated.customers._
-import http.generated.definitions.{ CreateCustomer, ErrorResponse, UpdateCustomer }
+import http.generated.definitions.{CreateCustomer, ErrorResponse, UpdateCustomer}
 import io.github.g4lowy.abstracttype.Id.UUIDOps
+import io.github.g4lowy.customer.application.CustomerService
 import io.github.g4lowy.customer.domain.model.CustomerId
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage._
@@ -10,10 +11,9 @@ import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.CustomerApi.Environment
 import io.github.g4lowy.http.converters.customers._
 import io.github.g4lowy.http.error._
-import io.github.g4lowy.http.service.CustomerService
 import io.github.g4lowy.validation.extras._
 import org.http4s.HttpRoutes
-import zio.{ RIO, Runtime, URIO, ZIO }
+import zio.{RIO, Runtime, URIO, ZIO}
 
 import java.util.UUID
 
