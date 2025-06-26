@@ -11,9 +11,15 @@ object DefectHandlingMiddleware {
       Kleisli { req: Request[RIO[R, *]] =>
         OptionT {
           service.run(req).value.catchAllDefect { err =>
-            ZIO
-              .logErrorCause(s"Request failed with a defect", Cause.die(err))
-              .as(Some(Response[RIO[R, *]](status = Status.InternalServerError)))
+            ZIO.fiberId.flatMap { fiberId =>
+              ZIO
+                .logErrorCause(
+                  s"Request failed with a defect",
+                  Cause.die(defect = err, trace = StackTrace.fromJava(fiberId, err.getStackTrace))
+                )
+                .as(Some(Response[RIO[R, *]](status = Status.InternalServerError)))
+            }
+
           }
         }
       }

@@ -24,7 +24,7 @@ object Controller {
       routesWithMiddleware = DefectHandlingMiddleware.recoverDefectLogged(combinedRoutes).orNotFound
     } yield routesWithMiddleware
 
-  val httpServer: ZIO[AppEnvironment & HttpServer, Throwable, Server[RIO[AppEnvironment, *]]] =
+  val startHttpServer: ZIO[AppEnvironment & HttpServer, Throwable, Server[RIO[AppEnvironment, *]]] =
     for {
       routes <- combinedRoutes
       server <- HttpServer.bindServer(routes)
@@ -32,5 +32,4 @@ object Controller {
       port   <- HttpServer.port
       _      <- ZIO.log(f"Starting server at $host:$port")
     } yield server
-
 }
