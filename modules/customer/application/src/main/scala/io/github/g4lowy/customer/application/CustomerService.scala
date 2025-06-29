@@ -1,4 +1,4 @@
-package io.github.g4lowy.http.service
+package io.github.g4lowy.customer.application
 
 import io.github.g4lowy.abstracttype.Id
 import io.github.g4lowy.customer.domain.model.{Customer, CustomerError, CustomerId}
