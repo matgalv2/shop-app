@@ -2,7 +2,6 @@ package io.github.g4lowy.order.infrastructure.database.repository
 
 import io.getquill.jdbczio.Quill
 import io.getquill.{Action, CamelCase}
-import io.github.g4lowy.abstracttype.Id.UUIDOps
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.database.model._
@@ -84,7 +83,7 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       ShipmentTypeSQL.decode(row.getString(index))
   }
 
-  override def create(order: Order): IO[OrderError.ProductsNotFound, OrderId] = {
+  override def create(order: Order): UIO[OrderId] = {
 
     val insertPaymentAddress =
       run {
@@ -112,29 +111,21 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
       }.orDie
     }
 
-    val insertOrderDetails = {
-      val details = order.details.map(_.productId.value)
-      run(quote(products.filter(product => liftQuery(details).contains(product.productId)))).orDie.flatMap {
-        foundProducts =>
-          val productIdsFromOrder = order.details.map(_.productId)
-          val foundProductIds     = foundProducts.map(_.productId.toId)
-
-          productIdsFromOrder.diff(foundProductIds) match {
-            case head :: tail => ZIO.fail(OrderError.ProductsNotFound(head, tail))
-            case Nil =>
-              ZIO.foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
-                run(quote(ordersDetails.insertValue(lift(orderProductSQL)))).orDie
-              )
+    val insertOrderDetails =
+      ZIO
+        .foreach(order.details.map(OrderDetailSQL.fromDomain))(orderProductSQL =>
+          run {
+            quote {
+              ordersDetails.insertValue(lift(orderProductSQL))
+            }
           }
-      }
-    }
+        )
+        .orDie
 
     transaction {
-      (insertPaymentAddress *> insertShipmentAddress *> insertOrder *> insertOrderDetails).either
-    }.orDie.flatMap {
-      case Left(error) => ZIO.fail(error)
-      case Right(_)    => ZIO.succeed(order.orderId)
-    }
+      insertPaymentAddress *> insertShipmentAddress *> insertOrder *> insertOrderDetails
+    }.orDie
+      .as(order.orderId)
   }
 
   override def getAll(offset: Int, limit: Int): UIO[List[Order]] =

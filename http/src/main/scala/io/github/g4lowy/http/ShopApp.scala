@@ -1,9 +1,12 @@
 package io.github.g4lowy.http
 
+import io.github.g4lowy.broker.infrastructure.BrokerConfiguration
 import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPostgres
 import io.github.g4lowy.http.cyclicjobs.OrderJobs
 import io.github.g4lowy.http.database.DatabaseConfiguration
 import io.github.g4lowy.http.database.DatabaseConfiguration.{postgresLive, quillDataSource}
+import io.github.g4lowy.order.application.OrderProcessor
+import io.github.g4lowy.order.infrastructure.broker.{KafkaOrderRequestConsumer, KafkaOrderRequestProducer, KafkaOrderResponseProducer}
 import io.github.g4lowy.order.infrastructure.database.repository.OrderRepositoryPostgres
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
 import zio.{Scope, ZIO, ZIOAppArgs, ZIOAppDefault}
@@ -25,7 +28,12 @@ object ShopApp extends ZIOAppDefault {
       CustomerRepositoryPostgres.live,
       ProductRepositoryPostgres.live,
       OrderRepositoryPostgres.live,
-      HttpServer.live
+      HttpServer.live,
+      BrokerConfiguration.producerLayer,
+      BrokerConfiguration.consumerLayer,
+      KafkaOrderRequestProducer.toLayer,
+      KafkaOrderResponseProducer.toLayer,
+      KafkaOrderRequestConsumer.toLayer
     )
   private val dependencies =
     AppConfig.live >+> quillDataSource >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
@@ -33,6 +41,7 @@ object ShopApp extends ZIOAppDefault {
   private val handleBackground = {
     for {
       _ <- OrderJobs.archiveOrdersOnceADay.forkDaemon
+      _ <- OrderProcessor.startConsumingOrderRequests
     } yield ()
   }
 

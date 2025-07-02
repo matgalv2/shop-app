@@ -7,7 +7,7 @@ import zio.{IO, UIO}
 
 @accessible
 trait OrderRepository {
-  def create(order: Order): IO[OrderError.ProductsNotFound, OrderId]
+  def create(order: Order): UIO[OrderId]
   def getAll(offset: Int, limit: Int): UIO[List[Order]]
   def getById(orderId: OrderId): IO[OrderError.NotFound, Order]
   def updateStatus(
