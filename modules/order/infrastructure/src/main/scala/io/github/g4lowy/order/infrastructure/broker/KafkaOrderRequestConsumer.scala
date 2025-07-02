@@ -48,7 +48,7 @@ case class KafkaOrderRequestConsumer(
     for {
       result   <- OrderService.createOrder(message.value)
       producer <- ZIO.service[MessageProducer[OrderResponseMessage, Producer]]
-      _        <- producer.produce(OrderResponseMessage(result))
+      _        <- producer.produce(OrderResponseMessage(message.requestId, result))
     } yield ()
 }
 
@@ -60,5 +60,5 @@ object KafkaOrderRequestConsumer {
   ] & OrderRepository & CustomerRepository & ProductRepository, Nothing, Unit]
 
   val toLayer: ULayer[OrderRequestConsumerType] =
-    ZLayer.succeed(KafkaOrderRequestConsumer(Serde.int, serdeOrderRequestMessage))
+    ZLayer.succeed(KafkaOrderRequestConsumer(Serde.int, OrderCodecs.orderRequestMessageSerde))
 }

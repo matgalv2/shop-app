@@ -26,6 +26,6 @@ case class KafkaOrderResponseProducer(
 object KafkaOrderResponseProducer {
 
   val toLayer: ULayer[MessageProducer[OrderResponseMessage, Producer]] = ZLayer.succeed {
-    KafkaOrderResponseProducer(Serde.int, serdeOrderResponseMessage)
+    KafkaOrderResponseProducer(Serde.int, OrderCodecs.orderResponseMessageSerde)
   }
 }

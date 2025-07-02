@@ -6,7 +6,7 @@ import io.github.g4lowy.customer.application.CustomerService
 import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage.ErrorToMessageOps
 import io.github.g4lowy.order.application.ApplicationOrderError.{CustomerNotFound, ProductsNotFound}
-import io.github.g4lowy.order.application.broker.OrderRequestMessage
+import io.github.g4lowy.order.application.broker.{OrderRequestMessage, Result}
 import io.github.g4lowy.order.application.converter.ordersDto.{OrderDetailDtoOps, OrderDtoOps}
 import io.github.g4lowy.order.application.dto.OrderDto
 import io.github.g4lowy.order.application.error._
@@ -35,13 +35,15 @@ object OrderService {
     OrderRepository.getById(domainId)
   }
 
-  def handleOrder(orderDto: OrderDto): ZIO[Producer with MessageProducer[OrderRequestMessage, Producer], Nothing, Unit] =
+  def handleOrderRequest(
+    orderDto: OrderDto
+  ): ZIO[Producer with MessageProducer[OrderRequestMessage, Producer], Nothing, Unit] =
     ZIO.serviceWithZIO[MessageProducer[OrderRequestMessage, Producer]] {
       _.produce(OrderRequestMessage(orderDto))
     }
 
   def createOrder(orderDto: OrderDto): URIO[OrderRepository & CustomerRepository & ProductRepository, Result] = {
-    val productIds = orderDto.details.map(_.productId.toId).toList
+    val productIds = orderDto.details.map(_.productId.toId)
     for {
       productsAndDetailDTOs <- ProductService
         .getMany(productIds)

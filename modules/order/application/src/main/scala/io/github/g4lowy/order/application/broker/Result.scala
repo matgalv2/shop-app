@@ -1,4 +1,4 @@
-package io.github.g4lowy.order.application
+package io.github.g4lowy.order.application.broker
 
 import java.util.UUID
 

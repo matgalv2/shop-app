@@ -5,7 +5,7 @@ import java.util.UUID
 
 case class OrderDto(
   customerId: UUID,
-  details: Vector[OrderDetailDto],
+  details: List[OrderDetailDto],
   paymentType: PaymentTypeDto,
   paymentAddress: AddressDto,
   shipmentType: ShipmentTypeDto,

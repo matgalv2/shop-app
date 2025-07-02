@@ -27,7 +27,7 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
     respond: CreateOrderResponse.type
   )(body: CreateOrder): RIO[Environment, CreateOrderResponse] =
     OrderService
-      .handleOrder(body.toDTO)
+      .handleOrderRequest(body.toDTO)
       .as(respond.Created(Message("Request has been created and is being processed now.")))
 
   override def getAllOrders(

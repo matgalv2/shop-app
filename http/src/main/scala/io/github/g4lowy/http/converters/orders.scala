@@ -44,7 +44,7 @@ object orders {
     def toDTO: OrderDto =
       create
         .into[OrderDto]
-        .withFieldComputed(_.details, _.details.map(_.toDTO))
+        .withFieldComputed(_.details, _.details.map(_.toDTO).toList)
         .withFieldComputed(_.paymentType, _.paymentType.toDTO)
         .withFieldComputed(_.paymentAddress, _.paymentAddress.toDTO)
         .withFieldComputed(_.shipmentType, _.shipmentType.toDTO)

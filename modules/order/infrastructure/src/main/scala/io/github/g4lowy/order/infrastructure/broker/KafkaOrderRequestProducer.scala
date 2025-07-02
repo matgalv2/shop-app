@@ -12,6 +12,7 @@ case class KafkaOrderRequestProducer(
   keySerializer: Serializer[Any, Int],
   valueSerializer: Serializer[Any, OrderRequestMessage]
 ) extends MessageProducer[OrderRequestMessage, Producer] {
+
   override def produce(value: OrderRequestMessage): URIO[Producer, Unit] = ZIO.scoped {
     ZIO.serviceWithZIO[Producer] {
       _.produce(
@@ -26,6 +27,6 @@ case class KafkaOrderRequestProducer(
 object KafkaOrderRequestProducer {
 
   val toLayer: ULayer[MessageProducer[OrderRequestMessage, Producer]] = ZLayer.succeed {
-    KafkaOrderRequestProducer(Serde.int, serdeOrderRequestMessage)
+    KafkaOrderRequestProducer(Serde.int, OrderCodecs.orderRequestMessageSerde)
   }
 }
