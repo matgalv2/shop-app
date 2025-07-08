@@ -1,6 +1,6 @@
 package io.github.g4lowy.http.api
 
-import http.generated.definitions.{CreateOrder, ErrorResponse, Message, PatchOrder}
+import http.generated.definitions.{ CreateOrder, ErrorResponse, Message, PatchOrder }
 import http.generated.orders
 import http.generated.orders._
 import io.github.g4lowy.broker.application.MessageProducer
@@ -8,16 +8,16 @@ import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.error.ErrorMessage._
 import io.github.g4lowy.http.AppEnvironment
 import io.github.g4lowy.http.api.OrderApi.Environment
-import io.github.g4lowy.http.converters.orders.{CreateOrderDtoOps, OrderOps, PatchOrderStatusOps}
+import io.github.g4lowy.http.converters.orders.{ CreateOrderDtoOps, OrderOps, PatchOrderStatusOps }
 import io.github.g4lowy.http.error._
 import io.github.g4lowy.order.application.OrderService
 import io.github.g4lowy.order.application.broker.OrderRequestMessage
-import io.github.g4lowy.order.domain.model.{OrderError, OrderId}
+import io.github.g4lowy.order.domain.model.{ OrderError, OrderId }
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.Union2
 import org.http4s.HttpRoutes
-import zio.{&, RIO, Runtime, URIO, ZIO}
+import zio.{ &, RIO, Runtime, URIO, ZIO }
 
 import java.util.UUID
 
@@ -51,9 +51,8 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
       .updateStatus(OrderId.fromUUID(orderId), body.status.toDTO)
       .mapBoth(
         {
-          case _ @Union2.First(err: OrderError.NotFound) => respond.NotFound(ErrorResponse.single(err.toMessage))
-          case _ @Union2.Second(err: OrderError.InvalidStatus) =>
-            respond.BadRequest(ErrorResponse.single(err.toMessage))
+          case err: OrderError.NotFound      => respond.NotFound(ErrorResponse.single(err.toMessage))
+          case err: OrderError.InvalidStatus => respond.BadRequest(ErrorResponse.single(err.toMessage))
         },
         _ => respond.NoContent
       )

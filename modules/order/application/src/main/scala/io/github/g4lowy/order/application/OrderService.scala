@@ -14,7 +14,7 @@ import io.github.g4lowy.order.domain.model.{Order, OrderError, OrderId, OrderSta
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.application.ProductService
 import io.github.g4lowy.product.domain.repository.ProductRepository
-import io.github.g4lowy.union.types.{Union2, Union3}
+import io.github.g4lowy.union.types.Union3
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.ValidationFailure
 import zio.{&, URIO, ZIO}
@@ -78,10 +78,7 @@ object OrderService {
     case Right(orderId) => Result.Success(orderId.value)
   }
 
-  def updateStatus(
-    orderId: OrderId,
-    orderStatus: OrderStatus
-  ): ZIO[OrderRepository, Union2[OrderError.NotFound, OrderError.InvalidStatus], Unit] =
+  def updateStatus(orderId: OrderId, orderStatus: OrderStatus): ZIO[OrderRepository, OrderError, Unit] =
     OrderRepository.updateStatus(orderId, orderStatus)
 
 }

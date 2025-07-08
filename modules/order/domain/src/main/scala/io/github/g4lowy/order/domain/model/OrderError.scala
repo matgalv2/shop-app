@@ -1,6 +1,5 @@
 package io.github.g4lowy.order.domain.model
 
-
 sealed trait OrderError
 
 object OrderError {

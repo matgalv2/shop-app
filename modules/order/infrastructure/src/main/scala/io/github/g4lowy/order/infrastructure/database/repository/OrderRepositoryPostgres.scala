@@ -6,7 +6,6 @@ import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.order.infrastructure.database.model._
 import io.github.g4lowy.product.infrastructure.model.ProductSQL
-import io.github.g4lowy.union.types.Union2
 import org.postgresql.util.PGobject
 import zio.{IO, UIO, URLayer, ZIO, ZLayer}
 
@@ -189,7 +188,7 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
   override def updateStatus(
     orderId: OrderId,
     orderStatus: OrderStatus
-  ): IO[Union2[OrderError.NotFound, OrderError.InvalidStatus], Unit] = {
+  ): IO[OrderError, Unit] = {
 
     val fetchOrder = quote(orders.filter(_.orderId == lift(orderId.value)))
     val result     = run(quote(fetchOrder)).orDie
@@ -200,8 +199,8 @@ case class OrderRepositoryPostgres(quill: Quill.Postgres[CamelCase]) extends Ord
           case Some(order) if order.status.toDomain.canBeReplacedBy(orderStatus) =>
             val orderStatusSql = OrderStatusSQL.fromDomain(orderStatus)
             run(quote(fetchOrder.update(_.status -> lift(orderStatusSql)))).orDie
-          case Some(_) => ZIO.fail(Union2.Second.apply(OrderError.InvalidStatus(orderId, orderStatus)))
-          case None    => ZIO.fail(Union2.First.apply(OrderError.NotFound(orderId)))
+          case Some(_) => ZIO.fail(OrderError.InvalidStatus(orderId, orderStatus))
+          case None    => ZIO.fail(OrderError.NotFound(orderId))
         }
       }.either
     }.orDie.flatMap {
