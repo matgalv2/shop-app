@@ -17,7 +17,6 @@ import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.{Union2, Union3}
 import io.github.g4lowy.validation.extras.ZIOValidationOps
 import io.github.g4lowy.validation.validators.ValidationFailure
-import zio.kafka.producer.Producer
 import zio.{&, URIO, ZIO}
 
 import java.util.UUID
@@ -35,15 +34,15 @@ object OrderService {
     OrderRepository.getById(domainId)
   }
 
-  def handleOrderRequest(
-    orderDto: OrderDto
-  ): ZIO[Producer with MessageProducer[OrderRequestMessage, Producer], Nothing, Unit] =
-    ZIO.serviceWithZIO[MessageProducer[OrderRequestMessage, Producer]] {
+  def handleOrderRequest(orderDto: OrderDto): URIO[MessageProducer[OrderRequestMessage], Unit] =
+    ZIO.serviceWithZIO[MessageProducer[OrderRequestMessage]] {
       _.produce(OrderRequestMessage(orderDto))
     }
 
   def createOrder(orderDto: OrderDto): URIO[OrderRepository & CustomerRepository & ProductRepository, Result] = {
+
     val productIds = orderDto.details.map(_.productId.toId)
+
     for {
       productsAndDetailDTOs <- ProductService
         .getMany(productIds)
@@ -63,16 +62,16 @@ object OrderService {
       orderId = OrderId.generate
       orderDetails = productsAndDetailDTOs.map { case (detailDto, product) =>
         detailDto.toDomain(orderId, product)
-      }.toList
+      }
       order <- ZIO.fromNotValidated(orderDto.toDomain(orderId, orderDetails)).mapError(Union3.First.apply)
       id    <- OrderRepository.create(order)
     } yield id
   }.either.map {
     case Left(error) =>
       val description = error match {
-        case Union3.First(error: ValidationFailure)                       => error.toMessage
-        case Union3.Second(error: ApplicationOrderError.CustomerNotFound) => error.toMessage
-        case Union3.Third(error: ProductsNotFound)                        => error.toMessage
+        case Union3.First(error: ValidationFailure) => error.toMessage
+        case Union3.Second(error: CustomerNotFound) => error.toMessage
+        case Union3.Third(error: ProductsNotFound)  => error.toMessage
       }
       Result.Failure(description)
 

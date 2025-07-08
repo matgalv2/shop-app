@@ -17,7 +17,6 @@ import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.domain.repository.ProductRepository
 import io.github.g4lowy.union.types.Union2
 import org.http4s.HttpRoutes
-import zio.kafka.producer.Producer
 import zio.{&, RIO, Runtime, URIO, ZIO}
 
 import java.util.UUID
@@ -62,7 +61,8 @@ class OrderApi extends OrdersHandler[RIO[AppEnvironment, *]] {
 }
 
 object OrderApi {
-  type Environment = OrderRepository & ProductRepository & CustomerRepository & Producer & MessageProducer[OrderRequestMessage, Producer]
+
+  type Environment = OrderRepository & ProductRepository & CustomerRepository & MessageProducer[OrderRequestMessage]
 
   val routes: URIO[AppEnvironment, HttpRoutes[RIO[AppEnvironment, *]]] = {
     import zio.interop.catz._

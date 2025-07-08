@@ -5,19 +5,21 @@ import io.github.g4lowy.customer.domain.repository.CustomerRepository
 import io.github.g4lowy.order.application.broker.{OrderRequestMessage, OrderResponseMessage}
 import io.github.g4lowy.order.domain.repository.OrderRepository
 import io.github.g4lowy.product.domain.repository.ProductRepository
-import zio.kafka.consumer.Consumer
-import zio.kafka.producer.Producer
-import zio.{&, ZIO}
+import zio.{&, Scope, ZIO}
 
 object OrderProcessor {
 
-  type OrderRequestConsumerType = MessageConsumer[OrderRequestMessage, Consumer & Producer & MessageProducer[
-    OrderResponseMessage,
-    Producer
-  ] & OrderRepository & CustomerRepository & ProductRepository, Nothing, Unit]
-
-  def startConsumingOrderRequests = ZIO.scoped {
-    ZIO.serviceWithZIO[OrderRequestConsumerType](_.startConsuming)
-
+  def consumeRequests: ZIO[MessageConsumer[OrderRequestMessage] & MessageProducer[
+    OrderResponseMessage
+  ] & OrderRepository & CustomerRepository & ProductRepository & Scope, Nothing, Unit] = ZIO.scoped {
+    ZIO.serviceWithZIO[MessageConsumer[OrderRequestMessage]](_.consume(consumeOrderRequestMessage))
   }
+
+  private def consumeOrderRequestMessage(message: OrderRequestMessage) =
+    for {
+      result <- OrderService.createOrder(message.value)
+      _ <- ZIO.serviceWith[MessageProducer[OrderResponseMessage]](
+        _.produce(OrderResponseMessage(message.requestId, result))
+      )
+    } yield ()
 }

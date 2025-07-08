@@ -1,13 +1,9 @@
 package io.github.g4lowy.broker.application
 
-import zio.ZIO
+import zio.{&, Scope, ZIO}
 
-trait MessageConsumer[MV <: Message[_], R, E, A] {
+trait MessageConsumer[M <: Message[_]] {
 
-  protected def consume(func: MV => ZIO[R, E, A]): ZIO[R, Nothing, Unit]
-
-  protected def func: MV => ZIO[R, E, A]
-
-  final def startConsuming: ZIO[R, Nothing, Unit] = consume(func)
+  def consume[R1, E, A, R2 <: R1](func: M => ZIO[R1, E, A]): ZIO[R2 & Scope, Nothing, Unit]
 
 }

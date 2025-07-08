@@ -1,9 +1,9 @@
 package io.github.g4lowy.broker.application
 
-import zio.URIO
+import zio.UIO
 
-trait MessageProducer[V, R] {
+trait MessageProducer[M <: Message[_]] {
 
-  def produce(value: V): URIO[R, Unit]
+  def produce(value: M): UIO[Unit]
 
 }
