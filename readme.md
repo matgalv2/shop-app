@@ -63,4 +63,4 @@ All APIs are described here:
 * Cyclic jobs - side tasks that must be done in specified intervals like archiving delivered orders after 3 months.
 
 ### 7. Asynchronous processing
-* Message Broker - some time-costly operation should be nonblocking that is why Kafka was utilized to process order requests
+* Message Broker - some time-consuming operations should be nonblocking that is why Kafka was utilized to process order requests.

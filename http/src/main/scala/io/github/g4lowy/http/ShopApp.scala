@@ -47,6 +47,5 @@ object ShopApp extends ZIOAppDefault {
   /*
    TODO:
     1. add test for archiving method
-    2. OrderRepository utilizes ProductError - refactor
    */
 }
