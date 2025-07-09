@@ -1,18 +1,18 @@
 package io.github.g4lowy.http.database
 
-import com.zaxxer.hikari.{ HikariConfig, HikariDataSource }
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import io.getquill.CamelCase
 import io.getquill.jdbczio.Quill
 import io.github.g4lowy.http.AppConfig
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
-import zio.{ ZIO, ZLayer }
+import zio.{ZIO, ZLayer}
 
 import javax.sql.DataSource
 
-object DatabaseConfiguration {
+object DatabaseUtils {
 
-  val flyway: ZIO[DataSource with AppConfig, Nothing, MigrateResult] =
+  val runFlywayMigrations: ZIO[DataSource with AppConfig, Nothing, MigrateResult] =
     for {
       config     <- ZIO.service[AppConfig]
       dataSource <- ZIO.service[DataSource]
