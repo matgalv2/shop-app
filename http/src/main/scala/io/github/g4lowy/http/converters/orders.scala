@@ -1,73 +1,60 @@
 package io.github.g4lowy.http.converters
 
 import http.generated.definitions.{CreateAddress, CreateOrder, CreateOrderDetail, GetAddress, GetOrder, GetOrderDetail, PatchOrder}
-import io.github.g4lowy.abstracttype.Id.UUIDOps
+import io.github.g4lowy.order.application.dto._
 import io.github.g4lowy.order.domain.model._
 import io.github.g4lowy.order.domain.model.address._
-import io.github.g4lowy.product.domain.model.Product
 import io.scalaland.chimney.dsl._
 
 import java.time.LocalDateTime
 
 object orders {
 
-  /*
-  // API -> domain
-  implicit class CreateAddressOps(private val createAddress: CreateAddress) extends AnyVal {
-    def toDTO: OrderDto.AddressDto =
+  // API -> DTO
+  implicit class CreateAddressDtoOps(private val createAddress: CreateAddress) extends AnyVal {
+    def toDTO: AddressDto =
       createAddress
-        .transformInto[OrderDto.AddressDto]
+        .transformInto[AddressDto]
   }
 
-  implicit class CreatePaymentTypeOps(private val createOrderPaymentType: CreateOrder.PaymentType) extends AnyVal {
-    def toDTO: OrderDto.PaymentTypeDto =
+  implicit class CreatePaymentTypeDtoOps(private val createOrderPaymentType: CreateOrder.PaymentType) extends AnyVal {
+    def toDTO: PaymentTypeDto =
       createOrderPaymentType match {
-        case CreateOrder.PaymentType.members.BankTransfer => OrderDto.PaymentTypeDto.BankTransfer
-        case CreateOrder.PaymentType.members.Card         => OrderDto.PaymentTypeDto.Card
-        case CreateOrder.PaymentType.members.OnDelivery   => OrderDto.PaymentTypeDto.OnDelivery
+        case CreateOrder.PaymentType.members.BankTransfer => PaymentTypeDto.BankTransfer
+        case CreateOrder.PaymentType.members.Card         => PaymentTypeDto.Card
+        case CreateOrder.PaymentType.members.OnDelivery   => PaymentTypeDto.OnDelivery
       }
   }
 
-  implicit class CreateShipmentTypeOps(private val createOrderShipmentType: CreateOrder.ShipmentType) extends AnyVal {
-    def toDTO: OrderDto.ShipmentTypeDto =
+  implicit class CreateShipmentTypeDtoOps(private val createOrderShipmentType: CreateOrder.ShipmentType)
+      extends AnyVal {
+    def toDTO: ShipmentTypeDto =
       createOrderShipmentType match {
-        case CreateOrder.ShipmentType.members.Courier => OrderDto.ShipmentTypeDto.Courier
-        case CreateOrder.ShipmentType.members.Box     => OrderDto.ShipmentTypeDto.Box
-        case CreateOrder.ShipmentType.members.OnPlace => OrderDto.ShipmentTypeDto.OnPlace
+        case CreateOrder.ShipmentType.members.Courier => ShipmentTypeDto.Courier
+        case CreateOrder.ShipmentType.members.Box     => ShipmentTypeDto.Box
+        case CreateOrder.ShipmentType.members.OnPlace => ShipmentTypeDto.OnPlace
       }
   }
 
-  implicit class CreateOrderOps(private val create: CreateOrder) extends AnyVal {
+  implicit class CreateOrderDetailDtoOps(private val createDetail: CreateOrderDetail) extends AnyVal {
+    def toDTO: OrderDetailDto = createDetail.transformInto[OrderDetailDto]
+  }
+
+  implicit class CreateOrderDtoOps(private val create: CreateOrder) extends AnyVal {
     def toDTO: OrderDto =
       create
         .into[OrderDto]
-        .withFieldComputed(_.orderDetails, _.details.map(_.toDTO))
+        .withFieldComputed(_.details, _.details.map(_.toDTO).toList)
         .withFieldComputed(_.paymentType, _.paymentType.toDTO)
         .withFieldComputed(_.paymentAddress, _.paymentAddress.toDTO)
         .withFieldComputed(_.shipmentType, _.shipmentType.toDTO)
         .withFieldComputed(_.shipmentAddress, _.shipmentAddress.map(_.toDTO))
-        .transform
-  }
-   */
-
-  // DTO -> domain
-
-  implicit class CreateAddressOps(private val createAddress: CreateAddress) extends AnyVal {
-    def toDomain: Address.Unvalidated =
-      createAddress
-        .into[Address.Unvalidated]
-        .withFieldConst(_.addressId, AddressId.generate)
-        .withFieldComputed(_.country, x => Country.Unvalidated(x.country))
-        .withFieldComputed(_.city, x => City.Unvalidated(x.city))
-        .withFieldComputed(_.street, x => Street.Unvalidated(x.street))
-        .withFieldComputed(_.zipCode, x => ZipCode.Unvalidated(x.zipCode))
-        .withFieldComputed(_.building, x => Building.Unvalidated(x.building))
-        .withFieldComputed(_.apartment, _.apartment.map(Apartment.Unvalidated))
+        .withFieldConst(_.createdAt, LocalDateTime.now())
         .transform
   }
 
   implicit class PatchOrderStatusOps(private val patchStatus: PatchOrder.Status) extends AnyVal {
-    def toDomain: OrderStatus =
+    def toDTO: OrderStatus =
       patchStatus match {
         case PatchOrder.Status.members.Created    => OrderStatus.Created
         case PatchOrder.Status.members.Cancelled  => OrderStatus.Cancelled
@@ -79,51 +66,69 @@ object orders {
       }
   }
 
-  implicit class CreatePaymentTypeOps(private val createPaymentType: CreateOrder.PaymentType) extends AnyVal {
-    def toDomain: PaymentType =
-      createPaymentType match {
-        case CreateOrder.PaymentType.BankTransfer => PaymentType.BankTransfer
-        case CreateOrder.PaymentType.Card         => PaymentType.Card
-        case CreateOrder.PaymentType.OnDelivery   => PaymentType.OnDelivery
-      }
-  }
+  // DTO -> domain
 
-  implicit class CreateShipmentTypeDto(private val createShipmentType: CreateOrder.ShipmentType) extends AnyVal {
-    def toDomain: ShipmentType =
-      createShipmentType match {
-        case CreateOrder.ShipmentType.Courier => ShipmentType.Courier
-        case CreateOrder.ShipmentType.Box     => ShipmentType.Box
-        case CreateOrder.ShipmentType.OnPlace => ShipmentType.OnPlace
-      }
-  }
+//  implicit class CreateAddressOps(private val addressDto: CreateAddress) extends AnyVal {
+//    def toDomain: Address.Unvalidated =
+//      createAddress
+//        .into[Address.Unvalidated]
+//        .withFieldConst(_.addressId, AddressId.generate)
+//        .withFieldComputed(_.country, x => Country.Unvalidated(x.country))
+//        .withFieldComputed(_.city, x => City.Unvalidated(x.city))
+//        .withFieldComputed(_.street, x => Street.Unvalidated(x.street))
+//        .withFieldComputed(_.zipCode, x => ZipCode.Unvalidated(x.zipCode))
+//        .withFieldComputed(_.building, x => Building.Unvalidated(x.building))
+//        .withFieldComputed(_.apartment, _.apartment.map(Apartment.Unvalidated))
+//        .transform
+//  }
+//
 
-  implicit class CreateOrderDetailOps(private val createOrderDetail: CreateOrderDetail) extends AnyVal {
-    def toDomain(orderId: OrderId, product: Product): OrderDetail.Unvalidated =
-      createOrderDetail
-        .into[OrderDetail.Unvalidated]
-        .withFieldConst(_.orderId, orderId)
-        .withFieldComputed(_.productId, _.productId.toId)
-        .withFieldComputed(_.quantity, _.quantity)
-        .withFieldConst(_.pricePerUnit, product.price.value)
-        .transform
-
-  }
-
-  implicit class CreateOrderOps(private val createOrder: CreateOrder) extends AnyVal {
-    def toDomain(orderId: OrderId, details: List[OrderDetail.Unvalidated]): Order.Unvalidated =
-      createOrder
-        .into[Order.Unvalidated]
-        .withFieldConst(_.orderId, orderId)
-        .withFieldComputed(_.customerId, _.customerId.toId)
-        .withFieldConst(_.details, details)
-        .withFieldConst(_.orderStatus, OrderStatus.Created)
-        .withFieldComputed(_.paymentType, _.paymentType.toDomain)
-        .withFieldComputed(_.paymentAddress, _.paymentAddress.toDomain)
-        .withFieldComputed(_.shipmentType, _.shipmentType.toDomain)
-        .withFieldComputed(_.shipmentAddress, _.shipmentAddress.map(_.toDomain))
-        .withFieldConst(_.createdAt, LocalDateTime.now())
-        .transform
-  }
+//
+//  implicit class CreatePaymentTypeOps(private val createPaymentType: CreateOrder.PaymentType) extends AnyVal {
+//    def toDomain: PaymentType =
+//      createPaymentType match {
+//        case CreateOrder.PaymentType.BankTransfer => PaymentType.BankTransfer
+//        case CreateOrder.PaymentType.Card         => PaymentType.Card
+//        case CreateOrder.PaymentType.OnDelivery   => PaymentType.OnDelivery
+//      }
+//  }
+//
+//  implicit class CreateShipmentTypeDto(private val createShipmentType: CreateOrder.ShipmentType) extends AnyVal {
+//    def toDomain: ShipmentType =
+//      createShipmentType match {
+//        case CreateOrder.ShipmentType.Courier => ShipmentType.Courier
+//        case CreateOrder.ShipmentType.Box     => ShipmentType.Box
+//        case CreateOrder.ShipmentType.OnPlace => ShipmentType.OnPlace
+//      }
+//  }
+//
+//  implicit class CreateOrderDetailOps(private val createOrderDetail: CreateOrderDetail) extends AnyVal {
+//    def toDomain(orderId: OrderId, product: Product): OrderDetail.Unvalidated =
+//      createOrderDetail
+//        .into[OrderDetail.Unvalidated]
+//        .withFieldConst(_.orderId, orderId)
+//        .withFieldComputed(_.productId, _.productId.toId)
+//        .withFieldComputed(_.quantity, _.quantity)
+//        .withFieldConst(_.pricePerUnit, product.price.value)
+//        .transform
+//
+//  }
+//
+//  implicit class CreateOrderOps(private val createOrder: CreateOrder) extends AnyVal {
+//    def toDomain(orderId: OrderId, details: List[OrderDetail.Unvalidated]): Order.Unvalidated =
+//      createOrder
+//        .into[Order.Unvalidated]
+//        .withFieldConst(_.orderId, orderId)
+//        .withFieldComputed(_.customerId, _.customerId.toId)
+//        .withFieldConst(_.details, details)
+//        .withFieldConst(_.orderStatus, OrderStatus.Created)
+//        .withFieldComputed(_.paymentType, _.paymentType.toDomain)
+//        .withFieldComputed(_.paymentAddress, _.paymentAddress.toDomain)
+//        .withFieldComputed(_.shipmentType, _.shipmentType.toDomain)
+//        .withFieldComputed(_.shipmentAddress, _.shipmentAddress.map(_.toDomain))
+//        .withFieldConst(_.createdAt, LocalDateTime.now())
+//        .transform
+//  }
 
   // domain -> API
 
