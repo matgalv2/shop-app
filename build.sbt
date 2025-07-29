@@ -4,7 +4,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 version := "0.1"
 name := "shop-app"
-ThisBuild / scalaVersion := "2.13.14"
+ThisBuild / scalaVersion := "2.13.16"
 
 val common = Seq(
   scalacOptions ++= (if (scalaVersion.value.startsWith("2.12")) Seq("-Ypartial-unification") else Nil),
@@ -71,11 +71,15 @@ lazy val http = (project in file("http"))
     abstractTypes,
     error,
     unionTypes,
+    broker,
     customerDomain,
+    customerApplication,
     customerInfrastructure,
     productDomain,
+    productApplication,
     productInfrastructure,
     orderDomain,
+    orderApplication,
     orderInfrastructure
   )
 
@@ -107,6 +111,14 @@ lazy val abstractTypes = (project in file("/modules/common/abstractTypes"))
   .settings(name := "abstract-types")
   .dependsOn(validation)
 
+lazy val broker = (project in file("/modules/broker"))
+  .settings(name := "broker")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.zio.kafka)
+  .dependsOn(validation, abstractTypes)
+
 lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(name := "customer-domain")
   .settings(common *)
@@ -114,6 +126,14 @@ lazy val customerDomain = (project in file("/modules/customer/domain"))
   .settings(libraryDependencies += Dependencies.zio.macros)
   .settings(libraryDependencies += Dependencies.cats.core)
   .dependsOn(validation, abstractTypes)
+
+lazy val customerApplication = (project in file("/modules/customer/application"))
+  .settings(name := "customer-application")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.cats.core)
+  .dependsOn(customerDomain, validation, abstractTypes)
 
 lazy val customerInfrastructure = (project in file("/modules/customer/infrastructure"))
   .settings(name := "customer-infrastructure")
@@ -131,6 +151,14 @@ lazy val productDomain = (project in file("/modules/product/domain"))
   .settings(libraryDependencies += Dependencies.cats.core)
   .dependsOn(validation, abstractTypes)
 
+lazy val productApplication = (project in file("/modules/product/application"))
+  .settings(name := "product-application")
+  .settings(common *)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.cats.core)
+  .dependsOn(productDomain, validation, abstractTypes)
+
 lazy val productInfrastructure = (project in file("/modules/product/infrastructure"))
   .settings(name := "product-infrastructure")
   .settings(common *)
@@ -142,15 +170,34 @@ lazy val productInfrastructure = (project in file("/modules/product/infrastructu
 lazy val orderDomain = (project in file("/modules/order/domain"))
   .settings(name := "order-domain")
   .settings(common *)
+  .settings(libraryDependencies += Dependencies.cats.core)
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.zio.macros)
+  .dependsOn(validation, abstractTypes, unionTypes)
+
+lazy val orderApplication = (project in file("/modules/order/application"))
+  .settings(name := "order-application")
+  .settings(common *)
   .settings(libraryDependencies += Dependencies.cats.core)
-  .dependsOn(validation, productDomain, customerDomain, abstractTypes, unionTypes)
+  .settings(libraryDependencies += Dependencies.zio.zio)
+  .settings(libraryDependencies += Dependencies.zio.macros)
+  .settings(libraryDependencies += Dependencies.scalaland.chimney)
+  .dependsOn(orderDomain, validation, error, broker, productApplication, customerApplication, abstractTypes, unionTypes)
 
 lazy val orderInfrastructure = (project in file("/modules/order/infrastructure"))
   .settings(name := "order-infrastructure")
   .settings(common *)
+  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
+  .settings(libraryDependencies += Dependencies.zio.kafka)
   .settings(libraryDependencies += Dependencies.zio.zio)
   .settings(libraryDependencies += Dependencies.quill.zio)
-  .settings(libraryDependencies += Dependencies.postgresql.postgresql)
-  .dependsOn(orderDomain, error, testUtils, customerInfrastructure, productInfrastructure)
+  .dependsOn(
+    orderDomain,
+    orderApplication,
+    broker,
+    error,
+    testUtils,
+    validation,
+    customerInfrastructure,
+    productInfrastructure
+  )

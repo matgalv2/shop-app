@@ -1,4 +1,4 @@
-package io.github.g4lowy.http.service
+package io.github.g4lowy.product.application
 
 import io.github.g4lowy.abstracttype.Id
 import io.github.g4lowy.product.domain.model.{Product, ProductError, ProductId}

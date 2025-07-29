@@ -48,13 +48,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderId"
-        400:
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/Message"
 
   /orders/{orderId}:
     get:
@@ -294,6 +288,14 @@ components:
           format: uuid
       required:
         - value
+
+    Message:
+      type: object
+      properties:
+        messages:
+          type: string
+      required:
+        - messages
 
     ErrorResponse:
       type: object
