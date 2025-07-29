@@ -4,7 +4,6 @@ import io.github.g4lowy.customer.infrastructure.repository.CustomerRepositoryPos
 import io.github.g4lowy.http.broker.BrokerUtils
 import io.github.g4lowy.http.cyclicjobs.OrderJobs
 import io.github.g4lowy.http.database.DatabaseUtils
-import io.github.g4lowy.http.database.DatabaseUtils.{postgresLive, quillDataSource}
 import io.github.g4lowy.order.application.OrderProcessor
 import io.github.g4lowy.order.infrastructure.database.repository.OrderRepositoryPostgres
 import io.github.g4lowy.product.infrastructure.repository.ProductRepositoryPostgres
@@ -15,8 +14,8 @@ object ShopApp extends ZIOAppDefault {
   override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
     for {
       _          <- DatabaseUtils.runFlywayMigrations
-      _          <- Controller.httpServer
-      _          <- handleBackground
+      _          <- Controller.startHttpServer
+      _          <- backgroundTasks
       useForever <- ZIO.never
     } yield useForever
   }
@@ -35,17 +34,12 @@ object ShopApp extends ZIOAppDefault {
     )
 
   private val dependencies =
-    AppConfig.live >+> quillDataSource >+> postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
+    AppConfig.live >+> DatabaseUtils.quillDataSource >+> DatabaseUtils.postgresLive >+> CustomerRepositoryPostgres.live ++ ProductRepositoryPostgres.live ++ HttpServer.live
 
-  private val handleBackground = {
+  private val backgroundTasks = {
     for {
       _ <- OrderJobs.archiveOrdersOnceADay.forkDaemon
       _ <- OrderProcessor.consumeRequests.forkScoped
     } yield ()
   }
-
-  /*
-   TODO:
-    1. add test for archiving method
-   */
 }
