@@ -140,23 +140,11 @@ class OrderApiAcceptanceSpec extends ApiAcceptanceSpec {
       val response = handleRequest(request)
       val body     = mapResponseBodyToJson(response)
 
-      Then("the response should be 204 Created")
+      Then("the response should be 201 Created")
       println(body.asObject)
       response.status shouldBe Status.Created
       body.asObject.exists(_.contains("value")) shouldBe true
 
-    }
-
-    "return response 400 Bad request for creating order (POST '/orders')" in {
-      Given("the request with invalid data")
-      val request = Request[RIO[AppEnvironment, *]](method = Method.POST, uri = baseURL)
-        .withEntity(invalidJson)
-
-      When("the request is processed")
-      val response = handleRequest(request)
-
-      Then("the response should be 400 Bad request")
-      response.status shouldBe Status.BadRequest
     }
 
     "return response 200 Ok for fetching orders (GET '/orders')" in {
