@@ -8,6 +8,7 @@ object Dependencies {
     lazy val testSbt     = "dev.zio" %% "zio-test-sbt"     % V.zio
     lazy val macros      = "dev.zio" %% "zio-macros"       % V.zio
     lazy val logging     = "dev.zio" %% "zio-logging"      % V.zioLogging
+    lazy val kafka       = "dev.zio" %% "zio-kafka"        % V.zioKafka
 
     object config {
       lazy val core           = "dev.zio" %% "zio-config"          % V.zioConfig
@@ -77,5 +78,6 @@ object Dependencies {
     val flyway      = "10.18.2"
     val chimney     = "1.4.0"
     val scalatest   = "3.2.19"
+    val zioKafka    = "2.10.0"
   }
 }
